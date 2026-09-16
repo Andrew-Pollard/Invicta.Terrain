@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Invicta.Terrain/Invicta.Terrain.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Invicta.Terrain.Tests/Invicta.Terrain.Tests.csproj" />
+  </Folder>
+</Solution>
