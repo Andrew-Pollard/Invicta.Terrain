@@ -13,4 +13,8 @@
     <InternalsVisibleTo Include="Invicta.Terrain.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.660" />
+  </ItemGroup>
+
 </Project>

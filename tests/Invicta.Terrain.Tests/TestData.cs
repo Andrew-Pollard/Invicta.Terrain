@@ -1,6 +1,8 @@
 // © 2026 Andrew Pollard. All rights reserved.
 // Licensed under the MIT License.
 
+using Invicta.Elevation;
+
 namespace Invicta;
 
 /// <summary>Finds and downloads the data files that tests read.</summary>
@@ -10,6 +12,10 @@ internal static class TestData
 
     /// <summary>Gets the <c>.cache</c> folder in the repository root, which Git ignores.</summary>
     public static string CacheDirectory { get; } = Path.Combine(FindRepositoryRoot(), ".cache");
+
+    /// <summary>Gets a store that keeps Copernicus DEM tiles in the cache folder.</summary>
+    public static CopernicusTileStore CopernicusTiles { get; } =
+        new(Path.Combine(CacheDirectory, "copernicus"), s_httpClient);
 
     /// <summary>Gets the path of a cached file, downloading it first if it is not already in the cache.</summary>
     /// <param name="relativePath">The path of the file within the cache folder.</param>
