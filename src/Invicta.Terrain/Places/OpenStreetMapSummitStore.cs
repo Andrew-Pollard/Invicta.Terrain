@@ -95,6 +95,16 @@ public sealed class OpenStreetMapSummitStore
         }
     }
 
+    private static int FloorToCell(double degrees)
+    {
+        return (int)Math.Floor(degrees / CellSize) * CellSize;
+    }
+
+    private static int NormalizeCellLongitude(int west)
+    {
+        return (int)Mod(west + 180, 360) - 180;
+    }
+
     private async Task<string> GetCellPathAsync(int south, int west, CancellationToken cancellationToken)
     {
         string path = Path.Combine(
@@ -172,16 +182,6 @@ public sealed class OpenStreetMapSummitStore
         return coordinate.Latitude >= region.South
             && coordinate.Latitude <= region.North
             && longitude <= region.East;
-    }
-
-    private static int FloorToCell(double degrees)
-    {
-        return (int)Math.Floor(degrees / CellSize) * CellSize;
-    }
-
-    private static int NormalizeCellLongitude(int west)
-    {
-        return (int)Mod(west + 180, 360) - 180;
     }
 
     private static double Mod(double value, double divisor)

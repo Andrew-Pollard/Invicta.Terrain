@@ -163,6 +163,21 @@ public static class ProfilePainter
             ink);
     }
 
+    /// <summary>Rounds a rough step up to 1, 2 or 5 times a power of ten.</summary>
+    private static double NiceStep(double rough)
+    {
+        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(rough)));
+        double normalized = rough / magnitude;
+
+        return magnitude * normalized switch
+        {
+            <= 1 => 1,
+            <= 2 => 2,
+            <= 5 => 5,
+            _ => 10,
+        };
+    }
+
     private static void PaintTitle(
         SKCanvas canvas, SKFont titleFont, SKFont font, SightLineProfile profile, string title)
     {
@@ -181,21 +196,6 @@ public static class ProfilePainter
 
         using SKFont creditsFont = new(SKTypeface.Default, 11);
         canvas.DrawText(DataCredits.Copernicus, Width - RightMargin, Height - 6, SKTextAlign.Right, creditsFont, faint);
-    }
-
-    /// <summary>Rounds a rough step up to 1, 2 or 5 times a power of ten.</summary>
-    private static double NiceStep(double rough)
-    {
-        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(rough)));
-        double normalized = rough / magnitude;
-
-        return magnitude * normalized switch
-        {
-            <= 1 => 1,
-            <= 2 => 2,
-            <= 5 => 5,
-            _ => 10,
-        };
     }
 
     private static string Format(FormattableString text)

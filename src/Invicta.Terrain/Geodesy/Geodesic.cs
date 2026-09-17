@@ -197,87 +197,6 @@ public static class Geodesic
         return new GeodesicSolution(0 + s12x, Atan2Degrees(salp1, calp1), Atan2Degrees(salp2, calp2));
     }
 
-    /// <summary>
-    /// Finds the initial azimuth of a geodesic that is neither meridional nor equatorial by Newton's method, keeping
-    /// the root bracketed and bisecting when a step would leave the bracket.
-    /// </summary>
-    /// <returns>The length of the geodesic.</returns>
-    private static double SolveByNewton(
-        double sbet1, double cbet1, double dn1, double sbet2, double cbet2, double dn2, double slam12, double clam12,
-        ref double salp1, ref double calp1, out double salp2, out double calp2, Span<double> ca)
-    {
-        double sig12;
-        double ssig1;
-        double csig1;
-        double ssig2;
-        double csig2;
-        double eps;
-
-        double salp1a = Tiny;
-        double calp1a = 1;
-        double salp1b = Tiny;
-        double calp1b = -1;
-        bool tripn = false;
-        bool tripb = false;
-
-        for (int numit = 0; ; numit++)
-        {
-            double v = Lambda12(
-                sbet1, cbet1, dn1, sbet2, cbet2, dn2, salp1, calp1, slam12, clam12, out salp2, out calp2, out sig12,
-                out ssig1, out csig1, out ssig2, out csig2, out eps, numit < NewtonIterationLimit, out double dv, ca);
-
-            // The reversed test lets NaNs escape.
-            if (tripb || !(Math.Abs(v) >= (tripn ? 8 : 1) * Tol0) || numit == BisectionIterationLimit)
-            {
-                break;
-            }
-
-            if (v > 0 && (numit > NewtonIterationLimit || calp1 / salp1 > calp1b / salp1b))
-            {
-                salp1b = salp1;
-                calp1b = calp1;
-            }
-            else if (v < 0 && (numit > NewtonIterationLimit || calp1 / salp1 < calp1a / salp1a))
-            {
-                salp1a = salp1;
-                calp1a = calp1;
-            }
-
-            if (numit < NewtonIterationLimit && dv > 0)
-            {
-                double dalp1 = -v / dv;
-                if (Math.Abs(dalp1) < Math.PI)
-                {
-                    double sdalp1 = Math.Sin(dalp1);
-                    double cdalp1 = Math.Cos(dalp1);
-                    double nsalp1 = (salp1 * cdalp1) + (calp1 * sdalp1);
-                    if (nsalp1 > 0)
-                    {
-                        calp1 = (calp1 * cdalp1) - (salp1 * sdalp1);
-                        salp1 = nsalp1;
-                        Normalize(ref salp1, ref calp1);
-
-                        // Convergence is not always quadratic, so test against epsilon rather than its square root.
-                        tripn = Math.Abs(v) <= 16 * Tol0;
-                        continue;
-                    }
-                }
-            }
-
-            // The Newton step was unusable, so bisect the bracket.
-            salp1 = (salp1a + salp1b) / 2;
-            calp1 = (calp1a + calp1b) / 2;
-            Normalize(ref salp1, ref calp1);
-            tripn = false;
-            tripb = Math.Abs(salp1a - salp1) + (calp1a - calp1) < Tolb
-                || Math.Abs(salp1 - salp1b) + (calp1 - calp1b) < Tolb;
-        }
-
-        Lengths(eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2, true, out double s12b, out _, ca);
-
-        return s12b * PolarRadius;
-    }
-
     /// <summary>Gets the sine and cosine of the reduced latitude, keeping the cosine positive at the poles.</summary>
     internal static void ReducedLatitude(double latitude, out double sbet, out double cbet)
     {
@@ -285,94 +204,6 @@ public static class Geodesic
         sbet *= F1;
         Normalize(ref sbet, ref cbet);
         cbet = Math.Max(Tiny, cbet);
-    }
-
-    /// <summary>
-    /// Computes the distance and reduced length of a geodesic, each divided by the polar radius. The distance is only
-    /// computed when <paramref name="computeDistance"/> is <see langword="true"/>.
-    /// </summary>
-    private static void Lengths(
-        double eps, double sig12, double ssig1, double csig1, double dn1, double ssig2, double csig2, double dn2,
-        bool computeDistance, out double s12b, out double m12b, Span<double> ca)
-    {
-        Span<double> cb = stackalloc double[SeriesOrder + 1];
-
-        double a1 = A1Minus1(eps);
-        C1Coefficients(eps, ca);
-        double a2 = A2Minus1(eps);
-        C2Coefficients(eps, cb);
-        double m0 = a1 - a2;
-        a2 = 1 + a2;
-        a1 = 1 + a1;
-
-        double j12;
-        if (computeDistance)
-        {
-            double b1 = SinCosSeries(true, ssig2, csig2, ca, SeriesOrder)
-                - SinCosSeries(true, ssig1, csig1, ca, SeriesOrder);
-            s12b = a1 * (sig12 + b1);
-
-            double b2 = SinCosSeries(true, ssig2, csig2, cb, SeriesOrder)
-                - SinCosSeries(true, ssig1, csig1, cb, SeriesOrder);
-            j12 = (m0 * sig12) + ((a1 * b1) - (a2 * b2));
-        }
-        else
-        {
-            s12b = double.NaN;
-            for (int l = 1; l <= SeriesOrder; l++)
-            {
-                cb[l] = (a1 * ca[l]) - (a2 * cb[l]);
-            }
-
-            double b12 = SinCosSeries(true, ssig2, csig2, cb, SeriesOrder)
-                - SinCosSeries(true, ssig1, csig1, cb, SeriesOrder);
-            j12 = (m0 * sig12) + b12;
-        }
-
-        // The parentheses around csig1 * ssig2 and ssig1 * csig2 ensure accurate cancellation for coincident points.
-        m12b = (dn2 * (csig1 * ssig2)) - (dn1 * (ssig1 * csig2)) - (csig1 * csig2 * j12);
-    }
-
-    /// <summary>
-    /// Solves the astroid equation k^4 + 2k^3 - (x^2 + y^2 - 1)k^2 - 2y^2 k - y^2 = 0 for its positive root.
-    /// </summary>
-    private static double Astroid(double x, double y)
-    {
-        double p = x * x;
-        double q = y * y;
-        double r = (p + q - 1) / 6;
-        if (q == 0 && r <= 0)
-        {
-            return 0;
-        }
-
-        double s = p * q / 4;
-        double r2 = r * r;
-        double r3 = r * r2;
-
-        // The discriminant of the quadratic equation for T3, which is zero on the evolute curve p^(1/3) + q^(1/3) = 1.
-        double disc = s * (s + (2 * r3));
-        double u = r;
-        if (disc >= 0)
-        {
-            // Pick the sign on the square root to maximize abs(T3), which minimizes loss of precision.
-            double t3 = s + r3;
-            t3 += t3 < 0 ? -Math.Sqrt(disc) : Math.Sqrt(disc);
-            double t = Math.Cbrt(t3);
-            u += t + (t != 0 ? r2 / t : 0);
-        }
-        else
-        {
-            // T is complex, but u is real. Pick the cube root that avoids cancellation.
-            double ang = Math.Atan2(Math.Sqrt(-disc), -(s + r3));
-            u += 2 * r * Math.Cos(ang / 3);
-        }
-
-        double v = Math.Sqrt((u * u) + q);
-        double uv = u < 0 ? q / (v - u) : u + v;
-        double w = (uv - q) / (2 * v);
-
-        return uv / (Math.Sqrt(uv + (w * w)) + w);
     }
 
     /// <summary>
@@ -474,6 +305,129 @@ public static class Geodesic
     }
 
     /// <summary>
+    /// Solves the astroid equation k^4 + 2k^3 - (x^2 + y^2 - 1)k^2 - 2y^2 k - y^2 = 0 for its positive root.
+    /// </summary>
+    private static double Astroid(double x, double y)
+    {
+        double p = x * x;
+        double q = y * y;
+        double r = (p + q - 1) / 6;
+        if (q == 0 && r <= 0)
+        {
+            return 0;
+        }
+
+        double s = p * q / 4;
+        double r2 = r * r;
+        double r3 = r * r2;
+
+        // The discriminant of the quadratic equation for T3, which is zero on the evolute curve p^(1/3) + q^(1/3) = 1.
+        double disc = s * (s + (2 * r3));
+        double u = r;
+        if (disc >= 0)
+        {
+            // Pick the sign on the square root to maximize abs(T3), which minimizes loss of precision.
+            double t3 = s + r3;
+            t3 += t3 < 0 ? -Math.Sqrt(disc) : Math.Sqrt(disc);
+            double t = Math.Cbrt(t3);
+            u += t + (t != 0 ? r2 / t : 0);
+        }
+        else
+        {
+            // T is complex, but u is real. Pick the cube root that avoids cancellation.
+            double ang = Math.Atan2(Math.Sqrt(-disc), -(s + r3));
+            u += 2 * r * Math.Cos(ang / 3);
+        }
+
+        double v = Math.Sqrt((u * u) + q);
+        double uv = u < 0 ? q / (v - u) : u + v;
+        double w = (uv - q) / (2 * v);
+
+        return uv / (Math.Sqrt(uv + (w * w)) + w);
+    }
+
+    /// <summary>
+    /// Finds the initial azimuth of a geodesic that is neither meridional nor equatorial by Newton's method, keeping
+    /// the root bracketed and bisecting when a step would leave the bracket.
+    /// </summary>
+    /// <returns>The length of the geodesic.</returns>
+    private static double SolveByNewton(
+        double sbet1, double cbet1, double dn1, double sbet2, double cbet2, double dn2, double slam12, double clam12,
+        ref double salp1, ref double calp1, out double salp2, out double calp2, Span<double> ca)
+    {
+        double sig12;
+        double ssig1;
+        double csig1;
+        double ssig2;
+        double csig2;
+        double eps;
+
+        double salp1a = Tiny;
+        double calp1a = 1;
+        double salp1b = Tiny;
+        double calp1b = -1;
+        bool tripn = false;
+        bool tripb = false;
+
+        for (int numit = 0; ; numit++)
+        {
+            double v = Lambda12(
+                sbet1, cbet1, dn1, sbet2, cbet2, dn2, salp1, calp1, slam12, clam12, out salp2, out calp2, out sig12,
+                out ssig1, out csig1, out ssig2, out csig2, out eps, numit < NewtonIterationLimit, out double dv, ca);
+
+            // The reversed test lets NaNs escape.
+            if (tripb || !(Math.Abs(v) >= (tripn ? 8 : 1) * Tol0) || numit == BisectionIterationLimit)
+            {
+                break;
+            }
+
+            if (v > 0 && (numit > NewtonIterationLimit || calp1 / salp1 > calp1b / salp1b))
+            {
+                salp1b = salp1;
+                calp1b = calp1;
+            }
+            else if (v < 0 && (numit > NewtonIterationLimit || calp1 / salp1 < calp1a / salp1a))
+            {
+                salp1a = salp1;
+                calp1a = calp1;
+            }
+
+            if (numit < NewtonIterationLimit && dv > 0)
+            {
+                double dalp1 = -v / dv;
+                if (Math.Abs(dalp1) < Math.PI)
+                {
+                    double sdalp1 = Math.Sin(dalp1);
+                    double cdalp1 = Math.Cos(dalp1);
+                    double nsalp1 = (salp1 * cdalp1) + (calp1 * sdalp1);
+                    if (nsalp1 > 0)
+                    {
+                        calp1 = (calp1 * cdalp1) - (salp1 * sdalp1);
+                        salp1 = nsalp1;
+                        Normalize(ref salp1, ref calp1);
+
+                        // Convergence is not always quadratic, so test against epsilon rather than its square root.
+                        tripn = Math.Abs(v) <= 16 * Tol0;
+                        continue;
+                    }
+                }
+            }
+
+            // The Newton step was unusable, so bisect the bracket.
+            salp1 = (salp1a + salp1b) / 2;
+            calp1 = (calp1a + calp1b) / 2;
+            Normalize(ref salp1, ref calp1);
+            tripn = false;
+            tripb = Math.Abs(salp1a - salp1) + (calp1a - calp1) < Tolb
+                || Math.Abs(salp1 - salp1b) + (calp1 - calp1b) < Tolb;
+        }
+
+        Lengths(eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2, true, out double s12b, out _, ca);
+
+        return s12b * PolarRadius;
+    }
+
+    /// <summary>
     /// Computes the longitude difference reached by a geodesic that starts at azimuth alp1, relative to the target
     /// difference given by <paramref name="slam120"/> and <paramref name="clam120"/>, and optionally its derivative
     /// with respect to alp1.
@@ -544,6 +498,52 @@ public static class Geodesic
         }
 
         return lam12;
+    }
+
+    /// <summary>
+    /// Computes the distance and reduced length of a geodesic, each divided by the polar radius. The distance is only
+    /// computed when <paramref name="computeDistance"/> is <see langword="true"/>.
+    /// </summary>
+    private static void Lengths(
+        double eps, double sig12, double ssig1, double csig1, double dn1, double ssig2, double csig2, double dn2,
+        bool computeDistance, out double s12b, out double m12b, Span<double> ca)
+    {
+        Span<double> cb = stackalloc double[SeriesOrder + 1];
+
+        double a1 = A1Minus1(eps);
+        C1Coefficients(eps, ca);
+        double a2 = A2Minus1(eps);
+        C2Coefficients(eps, cb);
+        double m0 = a1 - a2;
+        a2 = 1 + a2;
+        a1 = 1 + a1;
+
+        double j12;
+        if (computeDistance)
+        {
+            double b1 = SinCosSeries(true, ssig2, csig2, ca, SeriesOrder)
+                - SinCosSeries(true, ssig1, csig1, ca, SeriesOrder);
+            s12b = a1 * (sig12 + b1);
+
+            double b2 = SinCosSeries(true, ssig2, csig2, cb, SeriesOrder)
+                - SinCosSeries(true, ssig1, csig1, cb, SeriesOrder);
+            j12 = (m0 * sig12) + ((a1 * b1) - (a2 * b2));
+        }
+        else
+        {
+            s12b = double.NaN;
+            for (int l = 1; l <= SeriesOrder; l++)
+            {
+                cb[l] = (a1 * ca[l]) - (a2 * cb[l]);
+            }
+
+            double b12 = SinCosSeries(true, ssig2, csig2, cb, SeriesOrder)
+                - SinCosSeries(true, ssig1, csig1, cb, SeriesOrder);
+            j12 = (m0 * sig12) + b12;
+        }
+
+        // The parentheses around csig1 * ssig2 and ssig1 * csig2 ensure accurate cancellation for coincident points.
+        m12b = (dn2 * (csig1 * ssig2)) - (dn1 * (ssig1 * csig2)) - (csig1 * csig2 * j12);
     }
 
     /// <summary>Scales a sine and cosine pair so that the sum of their squares is one.</summary>

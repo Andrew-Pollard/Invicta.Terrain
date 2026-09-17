@@ -88,28 +88,6 @@ public static class PanoramaPainter
         data.SaveTo(file);
     }
 
-    /// <summary>Paints the terrain and sky of a panorama into a new bitmap the same size.</summary>
-    /// <param name="panorama">The panorama.</param>
-    /// <returns>The bitmap, which the caller must dispose.</returns>
-    public static SKBitmap PaintTerrain(Panorama panorama)
-    {
-        ArgumentNullException.ThrowIfNull(panorama);
-
-        SKColor[] colors = new SKColor[panorama.Width * panorama.Height];
-        Parallel.For(0, panorama.Height, y =>
-        {
-            for (int x = 0; x < panorama.Width; x++)
-            {
-                colors[(y * panorama.Width) + x] = PixelColor(panorama, x, y);
-            }
-        });
-
-        return new SKBitmap(panorama.Width, panorama.Height, SKColorType.Rgba8888, SKAlphaType.Opaque)
-        {
-            Pixels = colors,
-        };
-    }
-
     private static int HighestTerrainRow(Panorama panorama)
     {
         for (int y = 0; y < panorama.Height; y++)
@@ -130,6 +108,28 @@ public static class PanoramaPainter
     {
         using SKPaint paint = new() { Color = s_skyTop };
         canvas.DrawRect(0, 0, width, LabelBandHeight, paint);
+    }
+
+    /// <summary>Paints the terrain and sky of a panorama into a new bitmap the same size.</summary>
+    /// <param name="panorama">The panorama.</param>
+    /// <returns>The bitmap, which the caller must dispose.</returns>
+    public static SKBitmap PaintTerrain(Panorama panorama)
+    {
+        ArgumentNullException.ThrowIfNull(panorama);
+
+        SKColor[] colors = new SKColor[panorama.Width * panorama.Height];
+        Parallel.For(0, panorama.Height, y =>
+        {
+            for (int x = 0; x < panorama.Width; x++)
+            {
+                colors[(y * panorama.Width) + x] = PixelColor(panorama, x, y);
+            }
+        });
+
+        return new SKBitmap(panorama.Width, panorama.Height, SKColorType.Rgba8888, SKAlphaType.Opaque)
+        {
+            Pixels = colors,
+        };
     }
 
     private static SKColor PixelColor(Panorama panorama, int x, int y)

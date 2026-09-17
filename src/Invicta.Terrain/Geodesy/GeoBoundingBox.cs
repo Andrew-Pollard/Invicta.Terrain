@@ -94,11 +94,6 @@ public readonly record struct GeoBoundingBox
         return new GeoBoundingBox(south, center.Longitude + westOffset, north, center.Longitude + eastOffset);
     }
 
-    private static double DistanceToPole(GeoCoordinate center, double poleLatitude)
-    {
-        return Geodesic.Inverse(center, new GeoCoordinate(poleLatitude, center.Longitude)).Distance;
-    }
-
     private static double SouthernmostLatitude(GeoCoordinate center, double radius)
     {
         return radius >= DistanceToPole(center, -90)
@@ -111,5 +106,10 @@ public readonly record struct GeoBoundingBox
         return radius >= DistanceToPole(center, 90)
             ? 90
             : new GeodesicLine(center, 0).GetPosition(radius).Coordinate.Latitude;
+    }
+
+    private static double DistanceToPole(GeoCoordinate center, double poleLatitude)
+    {
+        return Geodesic.Inverse(center, new GeoCoordinate(poleLatitude, center.Longitude)).Distance;
     }
 }
