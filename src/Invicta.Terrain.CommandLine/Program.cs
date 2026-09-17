@@ -12,6 +12,8 @@ internal static class Program
     {
         RootCommand root = new("Renders and analyzes views of real terrain from the Copernicus GLO-30 DEM.");
         root.Subcommands.Add(PanoramaCommand.Create());
+        root.Subcommands.Add(ProfileCommand.Create());
+        root.Subcommands.Add(ViewshedCommand.Create());
 
         return root.Parse(args).InvokeAsync();
     }

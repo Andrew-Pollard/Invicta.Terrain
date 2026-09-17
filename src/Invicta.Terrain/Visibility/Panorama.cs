@@ -19,9 +19,6 @@ public sealed class Panorama
     // Steps closer than this gain nothing, since the terrain has a sample every 30 m.
     private const double MinimumStep = 15;
 
-    // Sunlight for shading comes from the north-west, 45° up, as in the usual cartographic hillshade.
-    private static readonly (double East, double North, double Up) s_sunDirection = (-0.5, 0.5, Math.Sqrt(0.5));
-
     private readonly float[] _distances;
     private readonly float[] _heights;
     private readonly float[] _shading;
@@ -209,14 +206,10 @@ public sealed class Panorama
         double north = model.GetElevation(new GeoCoordinate(northLatitude, center.Longitude));
         double south = model.GetElevation(new GeoCoordinate(southLatitude, center.Longitude));
 
-        // The surface normal is (-dz/dx, -dz/dy, 1), normalized.
         double slopeEast = (east - west) / (2 * baseline);
         double slopeNorth = (north - south) / (2 * baseline);
-        double length = Math.Sqrt((slopeEast * slopeEast) + (slopeNorth * slopeNorth) + 1);
 
-        double towardSun = (-slopeEast * s_sunDirection.East) - (slopeNorth * s_sunDirection.North) + s_sunDirection.Up;
-
-        return Math.Max(0, towardSun / length);
+        return Hillshade.Brightness(slopeEast, slopeNorth);
     }
 
     private int Index(int x, int y)
