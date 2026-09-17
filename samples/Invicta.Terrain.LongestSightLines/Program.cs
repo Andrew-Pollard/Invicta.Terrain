@@ -123,11 +123,6 @@ internal static class Program
         ConcurrentBag<SearchSummit> placed = [];
         Parallel.ForEach(summits, summit =>
         {
-            if (!Contains(s_region, summit.Coordinate))
-            {
-                return;
-            }
-
             (GeoCoordinate top, double height) =
                 terrain.FindHighestPoint(summit.Coordinate, SummitSearchHalfWidth, SampleSpacing);
             if (height >= MinimumSummitHeight)
@@ -141,12 +136,6 @@ internal static class Program
             .OrderBy(summit => summit.Name, StringComparer.Ordinal)
             .ThenBy(summit => summit.Coordinate.Latitude)
             .ThenBy(summit => summit.Coordinate.Longitude)];
-    }
-
-    private static bool Contains(GeoBoundingBox region, GeoCoordinate coordinate)
-    {
-        return coordinate.Latitude >= region.South && coordinate.Latitude <= region.North
-            && coordinate.Longitude >= region.West && coordinate.Longitude <= region.East;
     }
 
     /// <summary>
