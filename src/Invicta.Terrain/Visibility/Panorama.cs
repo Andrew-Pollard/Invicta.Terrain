@@ -212,6 +212,17 @@ public sealed class Panorama
         return TopAngle - ((y + 0.5) * PixelAngle);
     }
 
+    /// <summary>Gets the row that shows an elevation angle.</summary>
+    /// <param name="elevationAngle">The angle in degrees above the horizontal, negative below it.</param>
+    /// <returns>
+    /// The row, which is from -0.5 to the height less 0.5 when the angle is in view, and outside that range when it
+    /// is above or below the view.
+    /// </returns>
+    public double RowAt(double elevationAngle)
+    {
+        return ((TopAngle - elevationAngle) / PixelAngle) - 0.5;
+    }
+
     /// <summary>Gets the distance to the terrain a pixel shows.</summary>
     /// <param name="x">The column.</param>
     /// <param name="y">The row.</param>

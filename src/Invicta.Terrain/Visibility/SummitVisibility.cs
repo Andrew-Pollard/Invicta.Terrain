@@ -63,7 +63,7 @@ public static class SummitVisibility
         double azimuth = path.InitialAzimuth < 0 ? path.InitialAzimuth + 360 : path.InitialAzimuth;
 
         double x = panorama.ColumnAt(azimuth);
-        double y = ((panorama.TopAngle - angle) / panorama.PixelAngle) - 0.5;
+        double y = panorama.RowAt(angle);
         if (x >= panorama.Width - 0.5 || y < 0 || y >= panorama.Height)
         {
             return null;

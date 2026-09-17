@@ -130,6 +130,14 @@ internal sealed class PanoramaTests
     }
 
     [TestCase(0)]
+    [TestCase(17.5)]
+    [TestCase(39)]
+    public void RowAt_AngleAtARow_ReturnsThatRow(double row)
+    {
+        Assert.That(_panorama.RowAt(_panorama.ElevationAngleAt(row)), Is.EqualTo(row).Within(1e-9));
+    }
+
+    [TestCase(0)]
     [TestCase(-30)]
     [TestCase(361)]
     [TestCase(double.NaN)]

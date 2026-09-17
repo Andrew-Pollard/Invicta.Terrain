@@ -278,7 +278,7 @@ public static class PanoramaPainter
         int firstTick = (int)Math.Ceiling(leftEdge / 5) * 5;
         for (int azimuth = firstTick; azimuth < leftEdge + panorama.HorizontalFieldOfView; azimuth += 5)
         {
-            float x = (float)((azimuth - leftEdge) / panorama.PixelAngle);
+            float x = (float)panorama.ColumnAt(azimuth) + 0.5f;
             int compassAzimuth = ((azimuth % 360) + 360) % 360;
             bool major = compassAzimuth % 45 == 0;
             canvas.DrawLine(x, top, x, top + (major ? 12 : compassAzimuth % 15 == 0 ? 8 : 4), ink);
