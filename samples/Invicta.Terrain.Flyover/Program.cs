@@ -134,7 +134,9 @@ internal static class Program
     {
         IElevationModel model = terrain.GetModel(0);
         double flightDistance = path.Distance - route.StopShortOf;
-        int frameCount = (int)Math.Round(flightDistance / route.Speed * FrameRate);
+
+        // Two frames are the fewest that can be spaced along the flight, however short it is.
+        int frameCount = Math.Max(2, (int)Math.Round(flightDistance / route.Speed * FrameRate));
 
         GeoCoordinate[] positions = new GeoCoordinate[frameCount];
         double[] headings = new double[frameCount];
