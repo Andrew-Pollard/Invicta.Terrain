@@ -129,7 +129,24 @@ Scotland:
 
 ## Viewsheds
 
+A viewshed is the ground that can be seen from a point. The map below shades orange everything within 60 km that
+someone standing on Ben Nevis could see, over hillshaded terrain with the sea and lochs in blue.
+
 ![The ground visible from Ben Nevis, within 60 km][viewshed]
+
+- **Reading the map:** Ben Nevis is at the centre, marked by the small circle, with north up. The map uses the
+  azimuthal equidistant projection, so the distance and direction of every point from the centre are true, and the
+  scale bar measures distances from the centre exactly.
+- **What it shows:** most visible ground is on slopes facing Ben Nevis. The long orange strips are where it looks
+  straight along a valley, such as the Great Glen to the north-east and Loch Linnhe to the south-west. Little of the
+  mountain's own flanks is visible from the top, because they fall away beyond the edge of the summit plateau.
+- **How it is computed:** rays leave the centre so close together that neighbouring rays are one pixel apart at the
+  edge of the map, 6,284 of them here. Each ray samples the terrain every half pixel, and a point counts as visible
+  when its apparent angle, with the Earth's curvature and refraction, reaches the highest angle of anything nearer.
+  At 60 m per pixel that is 12.6 million samples, which take about 0.6 s, and painting the map a further 0.7 s.
+- **Targets above the ground:** `--target-height` maps where something standing on the ground could be seen, such
+  as a person at 2 m or a mast, rather than the ground itself. A target is seen over the terrain in front of it,
+  but does not hide anything behind it.
 
 ## Accuracy and limitations
 
