@@ -38,14 +38,16 @@ public static class PanoramaPainter
     private static readonly SKColor s_ink = new(30, 34, 40);
     private static readonly SKColor s_paper = new(245, 245, 242);
 
-    // Terrain colors by height, from lowland greens to bare summit rock.
+    // Terrain colors by height, from lowland greens through bare rock to the snow of the high mountains.
     private static readonly (double Height, SKColor Color)[] s_heightColors =
     [
         (0, new SKColor(62, 92, 56)),
         (300, new SKColor(96, 112, 64)),
         (700, new SKColor(128, 116, 86)),
         (1100, new SKColor(150, 144, 136)),
-        (1400, new SKColor(190, 188, 186)),
+        (1400, new SKColor(170, 166, 162)),
+        (2400, new SKColor(196, 194, 192)),
+        (3000, new SKColor(238, 240, 243)),
     ];
 
     /// <summary>Paints a panorama with its summit labels, and saves it as a PNG file.</summary>
@@ -264,15 +266,20 @@ public static class PanoramaPainter
         canvas.DrawRect(0, top, panorama.Width, CompassBandHeight, background);
 
         string[] points = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-        for (int azimuth = 0; azimuth < 360; azimuth += 5)
+        double leftEdge = panorama.AzimuthAt(-0.5);
+        int firstTick = (int)Math.Ceiling(leftEdge / 5) * 5;
+        for (int azimuth = firstTick; azimuth < leftEdge + panorama.HorizontalFieldOfView; azimuth += 5)
         {
-            float x = (float)(azimuth / panorama.PixelAngle);
-            bool major = azimuth % 45 == 0;
-            canvas.DrawLine(x, top, x, top + (major ? 12 : azimuth % 15 == 0 ? 8 : 4), ink);
+            float x = (float)((azimuth - leftEdge) / panorama.PixelAngle);
+            int compassAzimuth = ((azimuth % 360) + 360) % 360;
+            bool major = compassAzimuth % 45 == 0;
+            canvas.DrawLine(x, top, x, top + (major ? 12 : compassAzimuth % 15 == 0 ? 8 : 4), ink);
 
-            if (azimuth % 15 == 0)
+            if (compassAzimuth % 15 == 0)
             {
-                string label = major ? points[azimuth / 45] : azimuth.ToString(CultureInfo.InvariantCulture) + "°";
+                string label = major
+                    ? points[compassAzimuth / 45]
+                    : compassAzimuth.ToString(CultureInfo.InvariantCulture) + "°";
                 canvas.DrawText(label, x, top + 28, SKTextAlign.Center, font, ink);
             }
         }

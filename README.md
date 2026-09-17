@@ -148,6 +148,25 @@ someone standing on Ben Nevis could see, over hillshaded terrain with the sea an
   as a person at 2 m or a mast, rather than the ground itself. A target is seen over the terrain in front of it,
   but does not hide anything behind it.
 
+## Flyovers
+
+`samples/Invicta.Terrain.Flyover` renders the frames of a flight from Chamonix to the Matterhorn, 55 km across the
+Alps, each frame the view ahead from a moving camera. A panorama can span less than the full circle, so a frame is a
+60° view 1,280 pixels wide, a sixth of the work of a whole turn at the same resolution. The 1,200 frames of a
+20-second flight take 86 s to render once the data is cached.
+
+![The Matterhorn at the end of the flight, with Monte Rosa behind it][matterhorn]
+
+- **The camera:** it stays 900 m above the highest ground within 7 km ahead, averaged across neighbouring frames so
+  that it climbs gradually rather than in steps, and faces along the route.
+- **The summits:** each frame names the most prominent summits it shows, leaving out any whose label would overlap
+  one already placed. Naming them per frame makes the labels flicker a little as summits come in and out of view.
+- **The video:** the sample writes JPEG frames for a video tool to assemble.
+
+```bash
+ffmpeg -framerate 60 -i frame%05d.jpg -c:v libx264 -crf 20 -pix_fmt yuv420p flyover.mp4
+```
+
 ## Accuracy and limitations
 
 - **Surface model:** GLO-30 measures the surface, including forests and buildings, and smooths sharp summits: it puts
@@ -180,6 +199,7 @@ Open Database License.
 [merrick]: docs/images/merrick-to-yr-wyddfa.png
 [merrick-wikipedia]: https://en.wikipedia.org/wiki/Merrick_(Galloway)
 [cruachan]: docs/images/ben-cruachan-to-slieve-donard.png
+[matterhorn]: docs/images/chamonix-to-matterhorn.jpg
 [copernicus]: https://registry.opendata.aws/copernicus-dem/
 [osm]: https://www.openstreetmap.org/copyright
 [overpass]: https://wiki.openstreetmap.org/wiki/Overpass_API

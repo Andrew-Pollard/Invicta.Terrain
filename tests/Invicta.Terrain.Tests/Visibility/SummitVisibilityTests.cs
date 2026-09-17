@@ -72,6 +72,37 @@ internal sealed class SummitVisibilityTests
         }
     }
 
+    /// <summary>Tests that a view narrower than a full circle labels only the summits it shows.</summary>
+    [Test]
+    public void FindVisible_NarrowFieldOfView_LabelsOnlySummitsInView()
+    {
+        Cone ahead = new("Ahead", At(90, 20_000), 400, 2000);
+        Cone behindTheCamera = new("Behind the camera", At(270, 20_000), 400, 2000);
+        Cone[] cones = [ahead, behindTheCamera];
+
+        Viewpoint viewpoint = new(s_origin, 2);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new ConeTerrain(cones), MaximumDistance);
+        PanoramaOptions options = new()
+        {
+            Width = 900,
+            HorizontalFieldOfView = 90,
+            LeftEdgeAzimuth = 45,
+            TopAngle = 5,
+            BottomAngle = -2,
+            MaximumDistance = MaximumDistance,
+        };
+        Panorama panorama = Panorama.Render(terrain, viewpoint, options, CancellationToken.None);
+
+        IEnumerable<Summit> summits = cones.Select(cone => new Summit(cone.Name, cone.Peak, cone.Height, null));
+        IReadOnlyList<VisibleSummit> visible = SummitVisibility.FindVisible(panorama, terrain, summits);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(visible.Select(summit => summit.Summit.Name), Is.EquivalentTo(["Ahead"]));
+            Assert.That(visible[0].X, Is.EqualTo(449.5).Within(0.2));
+        }
+    }
+
     private static GeoCoordinate At(double azimuth, double distance)
     {
         return new GeodesicLine(s_origin, azimuth).GetPosition(distance);

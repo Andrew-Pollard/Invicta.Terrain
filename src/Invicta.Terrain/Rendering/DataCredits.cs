@@ -4,7 +4,7 @@
 namespace Invicta.Rendering;
 
 /// <summary>Defines the credits that the data's licences require on images made from it.</summary>
-internal static class DataCredits
+public static class DataCredits
 {
     /// <summary>The notice the Copernicus DEM licence requires on products adapted from the data.</summary>
     public const string Copernicus =

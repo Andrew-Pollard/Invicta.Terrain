@@ -7,12 +7,13 @@ using Invicta.Geodesy;
 namespace Invicta.Visibility;
 
 /// <summary>
-/// Represents the full 360° view from a viewpoint as a grid of pixels, each recording the terrain it shows: its
-/// distance, height and shading.
+/// Represents the view from a viewpoint as a grid of pixels, each recording the terrain it shows: its distance, height
+/// and shading.
 /// </summary>
 /// <remarks>
-/// Columns run clockwise from north at the left edge, and every pixel spans the same angle across and up, so the
-/// image is an equirectangular projection of the view.
+/// The view spans a full circle unless a narrower field of view is asked for, such as the view ahead of a moving
+/// camera. Columns run clockwise from the azimuth at the left edge, and every pixel spans the same angle across and up,
+/// so the image is an equirectangular projection of the view.
 /// </remarks>
 public sealed class Panorama
 {
@@ -27,7 +28,9 @@ public sealed class Panorama
     {
         Viewpoint = viewpoint;
         Width = options.Width;
-        PixelAngle = 360.0 / options.Width;
+        HorizontalFieldOfView = options.HorizontalFieldOfView;
+        LeftEdgeAzimuth = options.LeftEdgeAzimuth;
+        PixelAngle = options.HorizontalFieldOfView / options.Width;
         TopAngle = options.TopAngle;
         Height = (int)Math.Ceiling((options.TopAngle - options.BottomAngle) / PixelAngle);
         MaximumDistance = options.MaximumDistance;
@@ -46,6 +49,15 @@ public sealed class Panorama
 
     /// <summary>Gets the height in pixels.</summary>
     public int Height { get; }
+
+    /// <summary>Gets the angle in degrees the view spans across.</summary>
+    public double HorizontalFieldOfView { get; }
+
+    /// <summary>Gets the azimuth in degrees at the left edge of the view.</summary>
+    public double LeftEdgeAzimuth { get; }
+
+    /// <summary>Gets a value indicating whether the view spans a full circle, so that its edges meet.</summary>
+    public bool CoversFullCircle => HorizontalFieldOfView >= 360;
 
     /// <summary>Gets the angle in degrees that each pixel spans, across and up.</summary>
     public double PixelAngle { get; }
@@ -83,6 +95,15 @@ public sealed class Panorama
     private static void ThrowIfInvalid(PanoramaOptions options)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(options.Width, 4, nameof(options));
+
+        if (options.HorizontalFieldOfView is not (> 0 and <= 360))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options), "The field of view must be more than 0° and at most 360°.");
+        }
+
+        ArgumentChecks.ThrowIfNotFinite(options.LeftEdgeAzimuth);
+
         bool topInRange = options.TopAngle is > -90 and <= 90;
         bool bottomInRange = options.BottomAngle >= -90 && options.BottomAngle < options.TopAngle;
         if (!topInRange || !bottomInRange)
@@ -160,10 +181,27 @@ public sealed class Panorama
 
     /// <summary>Gets the azimuth in degrees at the center of a column.</summary>
     /// <param name="x">The column.</param>
-    /// <returns>The azimuth, clockwise from north.</returns>
+    /// <returns>The azimuth, clockwise from north, which a narrow view can carry beyond 360°.</returns>
     public double AzimuthAt(double x)
     {
-        return (x + 0.5) * PixelAngle;
+        return LeftEdgeAzimuth + ((x + 0.5) * PixelAngle);
+    }
+
+    /// <summary>Gets the column that shows an azimuth.</summary>
+    /// <param name="azimuth">The azimuth in degrees, clockwise from north.</param>
+    /// <returns>
+    /// The column, which is from -0.5 to the width less 0.5 when the azimuth is in view, and beyond that range when it
+    /// is behind the view.
+    /// </returns>
+    public double ColumnAt(double azimuth)
+    {
+        double fromLeftEdge = Math.IEEERemainder(azimuth - LeftEdgeAzimuth, 360);
+        if (fromLeftEdge < 0)
+        {
+            fromLeftEdge += 360;
+        }
+
+        return (fromLeftEdge / PixelAngle) - 0.5;
     }
 
     /// <summary>Gets the elevation angle in degrees at the center of a row.</summary>

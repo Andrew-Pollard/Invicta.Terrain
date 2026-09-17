@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/samples/">
+    <Project Path="samples/Invicta.Terrain.Flyover/Invicta.Terrain.Flyover.csproj" />
     <Project Path="samples/Invicta.Terrain.LongestSightLines/Invicta.Terrain.LongestSightLines.csproj" />
   </Folder>
   <Folder Name="/src/">

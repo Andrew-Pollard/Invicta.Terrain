@@ -77,6 +77,86 @@ internal sealed class PanoramaTests
     }
 
     [Test]
+    public void Render_NarrowFieldOfView_CoversItAtTheSameResolution()
+    {
+        Viewpoint viewpoint = new(s_location, EyeHeight, RefractionCoefficient);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new SeaTerrain(), MaximumDistance);
+        PanoramaOptions options = new()
+        {
+            Width = 600,
+            HorizontalFieldOfView = 60,
+            LeftEdgeAzimuth = 70,
+            TopAngle = 1,
+            BottomAngle = -3,
+            MaximumDistance = MaximumDistance,
+        };
+
+        Panorama sector = Panorama.Render(terrain, viewpoint, options, CancellationToken.None);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(sector.PixelAngle, Is.EqualTo(_panorama.PixelAngle));
+            Assert.That(sector.Height, Is.EqualTo(_panorama.Height));
+            Assert.That(sector.CoversFullCircle, Is.False);
+            Assert.That(sector.AzimuthAt(0), Is.EqualTo(70.05).Within(1e-12));
+            Assert.That(sector.AzimuthAt(sector.Width - 1), Is.EqualTo(129.95).Within(1e-12));
+
+            // The same column of the full circle, since the sea looks the same in every direction.
+            Assert.That(sector.GetDistance(300, 25), Is.EqualTo(_panorama.GetDistance(1000, 25)).Within(1));
+        }
+    }
+
+    [TestCase(70, 70.0, -0.5)]
+    [TestCase(70, 100.0, 299.5)]
+    [TestCase(70, 129.9, 598.5)]
+    [TestCase(70, 250.0, 1799.5)]
+    [TestCase(350, 10.0, 199.5)]
+    public void ColumnAt_NarrowFieldOfView_MeasuresFromTheLeftEdge(
+        double leftEdgeAzimuth, double azimuth, double expected)
+    {
+        Viewpoint viewpoint = new(s_location, EyeHeight);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new SeaTerrain(), 1000);
+        PanoramaOptions options = new()
+        {
+            Width = 600,
+            HorizontalFieldOfView = 60,
+            LeftEdgeAzimuth = leftEdgeAzimuth,
+            MaximumDistance = 1000,
+        };
+
+        Panorama panorama = Panorama.Render(terrain, viewpoint, options, CancellationToken.None);
+
+        Assert.That(panorama.ColumnAt(azimuth), Is.EqualTo(expected).Within(1e-9));
+    }
+
+    [TestCase(0)]
+    [TestCase(-30)]
+    [TestCase(361)]
+    [TestCase(double.NaN)]
+    public void Render_FieldOfViewOutOfRange_Throws(double fieldOfView)
+    {
+        Viewpoint viewpoint = new(s_location, EyeHeight);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new SeaTerrain(), 1000);
+        PanoramaOptions options = new() { HorizontalFieldOfView = fieldOfView };
+
+        Assert.That(
+            () => Panorama.Render(terrain, viewpoint, options, CancellationToken.None),
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+
+    [Test]
+    public void Render_LeftEdgeAzimuthNotFinite_Throws()
+    {
+        Viewpoint viewpoint = new(s_location, EyeHeight);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new SeaTerrain(), 1000);
+        PanoramaOptions options = new() { LeftEdgeAzimuth = double.PositiveInfinity };
+
+        Assert.That(
+            () => Panorama.Render(terrain, viewpoint, options, CancellationToken.None),
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+
+    [Test]
     public void Render_WidthTooSmall_Throws()
     {
         Viewpoint viewpoint = new(s_location, EyeHeight);

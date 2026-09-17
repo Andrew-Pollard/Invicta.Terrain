@@ -62,9 +62,9 @@ public static class SummitVisibility
         double angle = viewpoint.ApparentElevationAngle(summit.Coordinate, height, path.Distance) * 180 / Math.PI;
         double azimuth = path.InitialAzimuth < 0 ? path.InitialAzimuth + 360 : path.InitialAzimuth;
 
-        double x = (azimuth / panorama.PixelAngle) - 0.5;
+        double x = panorama.ColumnAt(azimuth);
         double y = ((panorama.TopAngle - angle) / panorama.PixelAngle) - 0.5;
-        if (y < 0 || y >= panorama.Height)
+        if (x >= panorama.Width - 0.5 || y < 0 || y >= panorama.Height)
         {
             return null;
         }
@@ -79,12 +79,10 @@ public static class SummitVisibility
     private static bool ShowsTerrainAtDistance(Panorama panorama, VisibleSummit summit)
     {
         double tolerance = Math.Max(250, 0.02 * summit.Distance);
-        int centerColumn = (int)Math.Round(summit.X);
         int summitRow = (int)Math.Round(summit.Y);
 
-        for (int column = centerColumn - 1; column <= centerColumn + 1; column++)
+        foreach (int x in ColumnsAround(panorama, (int)Math.Round(summit.X)))
         {
-            int x = ((column % panorama.Width) + panorama.Width) % panorama.Width;
             for (int y = summitRow; y <= Math.Min(summitRow + 2, panorama.Height - 1); y++)
             {
                 if (Math.Abs(panorama.GetDistance(x, y) - summit.Distance) <= tolerance)
@@ -95,5 +93,24 @@ public static class SummitVisibility
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Lists a column and its neighbors, wrapping around the edges of a full circle and clipping to those of a
+    /// narrower view.
+    /// </summary>
+    private static IEnumerable<int> ColumnsAround(Panorama panorama, int center)
+    {
+        for (int column = center - 1; column <= center + 1; column++)
+        {
+            if (panorama.CoversFullCircle)
+            {
+                yield return ((column % panorama.Width) + panorama.Width) % panorama.Width;
+            }
+            else if (column >= 0 && column < panorama.Width)
+            {
+                yield return column;
+            }
+        }
     }
 }
