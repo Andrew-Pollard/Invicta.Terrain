@@ -66,11 +66,7 @@ internal static class ProfileCommand
             GeoCoordinate to = new(result.GetValue(toLatitude), result.GetValue(toLongitude));
             CopernicusTileStore store = CommonOptions.CreateTileStore(result.GetRequiredValue(cache));
 
-            GeoBoundingBox region = new(
-                Math.Min(from.Latitude, to.Latitude),
-                Math.Min(from.Longitude, to.Longitude),
-                Math.Max(from.Latitude, to.Latitude),
-                Math.Max(from.Longitude, to.Longitude));
+            GeoBoundingBox region = GeoBoundingBox.AlongGeodesic(from, to);
             CopernicusElevationModel terrain =
                 await CopernicusElevationModel.LoadAsync(store, region, 0, cancellationToken);
 

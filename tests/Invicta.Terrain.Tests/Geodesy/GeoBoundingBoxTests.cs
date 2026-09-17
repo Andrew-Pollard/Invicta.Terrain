@@ -45,6 +45,57 @@ internal sealed class GeoBoundingBoxTests
         }
     }
 
+    [TestCase(56.95, -9, 56.95, 3)]
+    [TestCase(42.4, 2.1, 45.0, 6.3)]
+    [TestCase(-33.9, 151.2, -41.3, 174.8)]
+    [TestCase(10, 179, -5, -178)]
+    public void AlongGeodesic_PointsOnPath_AreInsideAndTouchEachEdge(
+        double startLatitude, double startLongitude, double endLatitude, double endLongitude)
+    {
+        // Within a meter, compared against sampling ten times as densely.
+        const double LatitudeTolerance = 1.0 / 110_000;
+
+        GeoCoordinate start = new(startLatitude, startLongitude);
+        GeoCoordinate end = new(endLatitude, endLongitude);
+        GeoBoundingBox box = GeoBoundingBox.AlongGeodesic(start, end);
+
+        GeodesicSolution path = Geodesic.Inverse(start, end);
+        GeodesicLine line = new(start, path.InitialAzimuth);
+        double south = 90;
+        double north = -90;
+        double west = double.PositiveInfinity;
+        double east = double.NegativeInfinity;
+        int samples = (int)Math.Ceiling(path.Distance / 100);
+        for (int i = 0; i <= samples; i++)
+        {
+            GeoCoordinate point = line.GetPosition(path.Distance * i / samples).Coordinate;
+            double unwrappedLongitude = startLongitude + Math.IEEERemainder(point.Longitude - startLongitude, 360);
+
+            south = Math.Min(south, point.Latitude);
+            north = Math.Max(north, point.Latitude);
+            west = Math.Min(west, unwrappedLongitude);
+            east = Math.Max(east, unwrappedLongitude);
+        }
+
+        double widestLatitude = Math.Max(Math.Abs(box.North), Math.Abs(box.South)) * Math.PI / 180;
+        double longitudeTolerance = LatitudeTolerance / Math.Cos(widestLatitude);
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(box.South, Is.EqualTo(south).Within(LatitudeTolerance));
+            Assert.That(box.North, Is.EqualTo(north).Within(LatitudeTolerance));
+            Assert.That(box.West, Is.EqualTo(west).Within(longitudeTolerance));
+            Assert.That(box.East, Is.EqualTo(east).Within(longitudeTolerance));
+        }
+    }
+
+    [Test]
+    public void AlongGeodesic_EastWestPath_BowsTowardThePole()
+    {
+        GeoBoundingBox box = GeoBoundingBox.AlongGeodesic(new GeoCoordinate(56.95, -9), new GeoCoordinate(56.95, 3));
+
+        Assert.That(box.North, Is.GreaterThan(57.05));
+    }
+
     [Test]
     public void Around_CircleContainingNorthPole_SpansAllLongitudes()
     {

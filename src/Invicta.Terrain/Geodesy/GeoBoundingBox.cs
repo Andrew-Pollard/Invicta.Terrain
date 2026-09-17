@@ -94,6 +94,41 @@ public readonly record struct GeoBoundingBox
         return new GeoBoundingBox(south, center.Longitude + westOffset, north, center.Longitude + eastOffset);
     }
 
+    /// <summary>Creates a box that contains the shortest path between two points.</summary>
+    /// <param name="start">The point where the path starts.</param>
+    /// <param name="end">The point where the path ends.</param>
+    /// <returns>A box containing the path to within a meter.</returns>
+    /// <remarks>
+    /// The path bows toward the nearer pole, so the box can reach further north or south than either end: points 729 km
+    /// apart at 56.95° N have a path that reaches 57.09° N.
+    /// </remarks>
+    public static GeoBoundingBox AlongGeodesic(GeoCoordinate start, GeoCoordinate end)
+    {
+        // Sampling every kilometer misses the path's extent by at most the sag of a 1 km chord, well under a meter.
+        const double SampleSpacing = 1000;
+
+        GeodesicSolution path = Geodesic.Inverse(start, end);
+        GeodesicLine line = new(start, path.InitialAzimuth);
+        int intervals = Math.Max(1, (int)Math.Ceiling(path.Distance / SampleSpacing));
+
+        double south = Math.Min(start.Latitude, end.Latitude);
+        double north = Math.Max(start.Latitude, end.Latitude);
+        double westOffset = Math.Min(0, Math.IEEERemainder(end.Longitude - start.Longitude, 360));
+        double eastOffset = Math.Max(0, Math.IEEERemainder(end.Longitude - start.Longitude, 360));
+        for (int i = 1; i < intervals; i++)
+        {
+            GeoCoordinate point = line.GetPosition(path.Distance * i / intervals).Coordinate;
+            double longitudeOffset = Math.IEEERemainder(point.Longitude - start.Longitude, 360);
+
+            south = Math.Min(south, point.Latitude);
+            north = Math.Max(north, point.Latitude);
+            westOffset = Math.Min(westOffset, longitudeOffset);
+            eastOffset = Math.Max(eastOffset, longitudeOffset);
+        }
+
+        return new GeoBoundingBox(south, start.Longitude + westOffset, north, start.Longitude + eastOffset);
+    }
+
     private static double SouthernmostLatitude(GeoCoordinate center, double radius)
     {
         return radius >= DistanceToPole(center, -90)
