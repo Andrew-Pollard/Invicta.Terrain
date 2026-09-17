@@ -30,7 +30,7 @@ public sealed class Panorama
         Width = options.Width;
         HorizontalFieldOfView = options.HorizontalFieldOfView;
         LeftEdgeAzimuth = options.LeftEdgeAzimuth;
-        PixelAngle = options.HorizontalFieldOfView / options.Width;
+        PixelAngle = options.PixelAngle;
         TopAngle = options.TopAngle;
         Height = (int)Math.Ceiling((options.TopAngle - options.BottomAngle) / PixelAngle);
         MaximumDistance = options.MaximumDistance;

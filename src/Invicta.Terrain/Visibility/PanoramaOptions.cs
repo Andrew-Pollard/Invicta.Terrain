@@ -28,4 +28,10 @@ public sealed record PanoramaOptions
 
     /// <summary>Gets the distance in meters beyond which terrain is ignored. The default is 450 km.</summary>
     public double MaximumDistance { get; init; } = 450_000;
+
+    /// <summary>
+    /// Gets the angle in degrees each pixel spans, across and up, which the width and the field of view set between
+    /// them. Terrain sampled more finely than this cannot be told apart in the picture.
+    /// </summary>
+    public double PixelAngle => HorizontalFieldOfView / Width;
 }
