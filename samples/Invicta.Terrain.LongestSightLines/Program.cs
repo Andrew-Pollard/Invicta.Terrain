@@ -31,6 +31,8 @@ internal static class Program
     // Mapped summits are moved to the highest terrain within this distance.
     private const double SummitSearchHalfWidth = 60;
 
+    // Someone stands on each summit. A target exactly on a rounded summit is often hidden by the summit itself,
+    // which the Earth's curvature makes appear higher just in front of it.
     private const double EyeHeight = 2;
     private const double SampleSpacing = 15;
 
@@ -101,7 +103,7 @@ internal static class Program
             SightLine line = sightLines[i];
             Viewpoint viewpoint = new(line.From.Coordinate, line.From.Height + EyeHeight, refraction);
             SightLineProfile profile = SightLineProfile.Trace(
-                terrain, viewpoint, line.To.Coordinate, line.To.Height, SampleSpacing, ProfilePointCount);
+                terrain, viewpoint, line.To.Coordinate, line.To.Height + EyeHeight, SampleSpacing, ProfilePointCount);
 
             string title = string.Create(
                 CultureInfo.InvariantCulture,
@@ -196,9 +198,9 @@ internal static class Program
     }
 
     /// <summary>
-    /// Traces each pair both ways with the most refraction considered, and for each way that sees the other summit,
-    /// finds the least refraction that still allows it. The eye stands above the ground but the summit looked at does
-    /// not, so the two ways can differ, as when a nearby ridge frames a view one way only.
+    /// Traces each pair with the most refraction considered, and for those that see each other, finds the least
+    /// refraction that still allows it. Someone stands on each summit, with their eyes at the same height, so the line
+    /// of sight is the same whichever way it is traced.
     /// </summary>
     private static List<SightLine> TracePairs(
         IElevationModel terrain, List<(SearchSummit From, SearchSummit To, double Distance)> pairs)
@@ -207,13 +209,9 @@ internal static class Program
         int traced = 0;
         Parallel.ForEach(pairs, pair =>
         {
-            double? forward = LeastRefractionForVisibility(terrain, pair.From, pair.To);
-            double? backward = LeastRefractionForVisibility(terrain, pair.To, pair.From);
-            if (forward is not null || backward is not null)
+            if (LeastRefractionForVisibility(terrain, pair.From, pair.To) is double leastRefraction)
             {
-                sightLines.Add(backward is null || (forward is not null && forward <= backward)
-                    ? new SightLine(pair.From, pair.To, pair.Distance, forward!.Value, backward)
-                    : new SightLine(pair.To, pair.From, pair.Distance, backward.Value, forward));
+                sightLines.Add(new SightLine(pair.From, pair.To, pair.Distance, leastRefraction));
             }
 
             int count = Interlocked.Increment(ref traced);
@@ -230,7 +228,7 @@ internal static class Program
     {
         Viewpoint viewpoint = new(from.Coordinate, from.Height + EyeHeight, refraction);
 
-        return LineOfSight.Trace(terrain, viewpoint, to.Coordinate, to.Height, SampleSpacing).IsVisible;
+        return LineOfSight.Trace(terrain, viewpoint, to.Coordinate, to.Height + EyeHeight, SampleSpacing).IsVisible;
     }
 
     /// <summary>
@@ -303,18 +301,15 @@ internal static class Program
     private static string FormatTable(List<SightLine> sightLines)
     {
         StringBuilder table = new();
-        table.AppendLine("| Distance | From | To | Least refraction coefficient | The other way |");
-        table.AppendLine("|---:|---|---|---:|---:|");
+        table.AppendLine("| Distance | From | To | Least refraction coefficient |");
+        table.AppendLine("|---:|---|---|---:|");
         foreach (SightLine line in sightLines)
         {
-            string otherWay = line.OtherWayLeastRefractionCoefficient is double coefficient
-                ? coefficient.ToString("0.000", CultureInfo.InvariantCulture)
-                : "hidden";
             string distance = string.Create(CultureInfo.InvariantCulture, $"{line.Distance / 1000:0.0} km");
             string refraction = line.LeastRefractionCoefficient.ToString("0.000", CultureInfo.InvariantCulture);
             table.AppendLine(
                 CultureInfo.InvariantCulture,
-                $"| {distance} | {Describe(line.From)} | {Describe(line.To)} | {refraction} | {otherWay} |");
+                $"| {distance} | {Describe(line.From)} | {Describe(line.To)} | {refraction} |");
         }
 
         return table.ToString();
@@ -328,14 +323,7 @@ internal static class Program
     /// <summary>Describes a summit placed on the terrain.</summary>
     private sealed record SearchSummit(string Name, GeoCoordinate Coordinate, double Height);
 
-    /// <summary>
-    /// Describes a summit that can be seen from another, looking the way that needs the least refraction, and how much
-    /// looking the other way needs, if it can be seen at all.
-    /// </summary>
+    /// <summary>Describes a pair of summits that can see each other.</summary>
     private sealed record SightLine(
-        SearchSummit From,
-        SearchSummit To,
-        double Distance,
-        double LeastRefractionCoefficient,
-        double? OtherWayLeastRefractionCoefficient);
+        SearchSummit From, SearchSummit To, double Distance, double LeastRefractionCoefficient);
 }

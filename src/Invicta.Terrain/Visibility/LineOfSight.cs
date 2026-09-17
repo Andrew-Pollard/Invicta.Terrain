@@ -23,7 +23,10 @@ public static class LineOfSight
     /// </exception>
     /// <remarks>
     /// Samples stop half a spacing short of the target, so a target on the ground can be seen unless the ground in
-    /// front of it rises above the line of sight, as it does on a slope facing away.
+    /// front of it rises above the line of sight. Beyond a few kilometers that includes level ground, which the
+    /// Earth's curvature makes appear higher the nearer it is, so a target exactly on a rounded summit is often hidden
+    /// by the summit itself. To ask whether a summit can be seen, look for a target a little above it, such as a
+    /// person standing there.
     /// </remarks>
     public static LineOfSightResult Trace(
         IElevationModel terrain, Viewpoint viewpoint, GeoCoordinate target, double targetHeight, double sampleSpacing)

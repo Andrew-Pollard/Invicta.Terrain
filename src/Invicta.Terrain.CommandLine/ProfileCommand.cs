@@ -28,6 +28,11 @@ internal static class ProfileCommand
         Option<double> toLatitude = new("--to-lat") { Description = "The target's latitude.", Required = true };
         Option<double> toLongitude = new("--to-lon") { Description = "The target's longitude.", Required = true };
         Option<double> eyeHeight = CommonOptions.EyeHeight();
+        Option<double> targetHeight = new("--target-height")
+        {
+            Description = "The height in meters above the ground of what to look for, such as 2 for a person.",
+            DefaultValueFactory = _ => 2,
+        };
         Option<double> summitSearch = new("--summit-search")
         {
             Description = "Moves each end to the highest terrain within this many meters, for mapped summits.",
@@ -43,7 +48,16 @@ internal static class ProfileCommand
 
         Command command = new("profile", "Traces the line of sight between two points and draws its profile.")
         {
-            fromLatitude, fromLongitude, toLatitude, toLongitude, eyeHeight, summitSearch, refraction, cache, output,
+            fromLatitude,
+            fromLongitude,
+            toLatitude,
+            toLongitude,
+            eyeHeight,
+            targetHeight,
+            summitSearch,
+            refraction,
+            cache,
+            output,
         };
 
         command.SetAction(async (result, cancellationToken) =>
@@ -62,14 +76,15 @@ internal static class ProfileCommand
 
             double searchHalfWidth = result.GetValue(summitSearch);
             (GeoCoordinate eye, double eyeGround) = terrain.FindHighestPoint(from, searchHalfWidth, 5);
-            (GeoCoordinate target, double targetHeight) = terrain.FindHighestPoint(to, searchHalfWidth, 5);
+            (GeoCoordinate target, double targetGround) = terrain.FindHighestPoint(to, searchHalfWidth, 5);
 
             Viewpoint viewpoint = new(eye, eyeGround + result.GetValue(eyeHeight), result.GetValue(refraction));
+            double targetTop = targetGround + result.GetValue(targetHeight);
             SightLineProfile profile = SightLineProfile.Trace(
-                terrain, viewpoint, target, targetHeight, SampleSpacing, ProfilePointCount);
+                terrain, viewpoint, target, targetTop, SampleSpacing, ProfilePointCount);
 
             string title = string.Create(
-                CultureInfo.InvariantCulture, $"From {eye} ({eyeGround:0} m) to {target} ({targetHeight:0} m)");
+                CultureInfo.InvariantCulture, $"From {eye} ({eyeGround:0} m) to {target} ({targetGround:0} m)");
             ProfilePainter.SavePng(profile, title, result.GetRequiredValue(output).FullName);
 
             LineOfSightResult trace = profile.Result;

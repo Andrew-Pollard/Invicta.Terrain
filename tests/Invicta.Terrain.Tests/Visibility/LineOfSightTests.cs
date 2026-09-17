@@ -63,6 +63,22 @@ internal sealed class LineOfSightTests
         }
     }
 
+    [TestCase(0, false)]
+    [TestCase(2, true)]
+    public void Trace_TargetOnFlatSummitFarAway_IsHiddenBySummitUnlessRaised(double heightAboveSummit, bool expected)
+    {
+        // A 1,000 m hill 40 km away has a flat top 300 m across. From an eye at the same height, the Earth's curvature
+        // makes the near edge of the top appear higher than its center, which hides a target on the ground there but
+        // not a person standing there.
+        Viewpoint viewpoint = new(s_origin, 1002);
+        GeoCoordinate summit = new GeodesicLine(s_origin, 45).GetPosition(40_000).Coordinate;
+        FlatTopTerrain terrain = new(summit, height: 1000, radius: 150);
+
+        LineOfSightResult result = LineOfSight.Trace(terrain, viewpoint, summit, 1000 + heightAboveSummit, 15);
+
+        Assert.That(result.IsVisible, Is.EqualTo(expected));
+    }
+
     [Test]
     public void Trace_SampleSpacingNotPositive_Throws()
     {
@@ -89,6 +105,16 @@ internal sealed class LineOfSightTests
             double distance = Geodesic.Inverse(center, coordinate).Distance;
 
             return Math.Abs(distance - ridgeDistance) <= 50 ? ridgeHeight : 0;
+        }
+    }
+
+    /// <summary>Represents flat ground at sea level with a steep-sided hill whose top is flat.</summary>
+    private sealed class FlatTopTerrain(GeoCoordinate center, double height, double radius) : IElevationModel
+    {
+        /// <inheritdoc/>
+        public double GetElevation(GeoCoordinate coordinate)
+        {
+            return Geodesic.Inverse(center, coordinate).Distance <= radius ? height : 0;
         }
     }
 }

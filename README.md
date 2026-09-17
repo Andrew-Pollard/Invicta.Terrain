@@ -49,13 +49,14 @@ using HttpClient httpClient = new();
 CopernicusTileStore tiles = new(cacheDirectory, httpClient);
 
 GeoCoordinate benNevis = new(56.79685, -5.00351);
-GeoCoordinate cairnGorm = new(57.11667, -3.64389);
+GeoCoordinate benMacdui = new(57.07039, -3.66913);
 CopernicusElevationModel terrain = await CopernicusElevationModel.LoadAsync(
     tiles, new GeoBoundingBox(56.7, -5.1, 57.2, -3.6), overviewLevel: 0, cancellationToken);
 
+// Can someone on Ben Nevis see someone standing on Ben Macdui, 87 km away?
 Viewpoint viewpoint = Viewpoint.AboveTerrain(terrain, benNevis, heightAboveTerrain: 2);
 LineOfSightResult result = LineOfSight.Trace(
-    terrain, viewpoint, cairnGorm, terrain.GetElevation(cairnGorm), sampleSpacing: 15);
+    terrain, viewpoint, benMacdui, terrain.GetElevation(benMacdui) + 2, sampleSpacing: 15);
 ```
 
 ## How it works
@@ -90,25 +91,25 @@ the Earth across the Gulf of Lion, so whether it clears does depend on refractio
 
 `samples/Invicta.Terrain.LongestSightLines` searches every pair of named summits of at least 300 m in Great Britain,
 Ireland and the Isle of Man, 11,746 summits in all. It keeps the 5 million pairs over 150 km apart whose horizons
-could meet, traces each both ways at full resolution with the eye 2 m above the summit, and finds the least refraction
-coefficient that lets each way see the other summit. The search takes 25 minutes on 16 threads. The tables leave out
-lines whose ends are both within 10 km of a longer line's ends, which are usually the same view.
+could meet, traces each at full resolution between people standing on the two summits, and finds the least refraction
+coefficient at which they can see each other. The search takes 12 minutes on 16 threads. The tables leave out lines
+whose ends are both within 10 km of a longer line's ends, which are usually the same view.
 
 With standard refraction, the longest is Merrick in Galloway to Yr Wyddfa (Snowdon), at 231.9 km, which agrees with
 the [232 km line between them][merrick-wikipedia] long cited as the longest in the British Isles. It needs a
-refraction coefficient of at least 0.097; with less, the curve of the Irish Sea itself blocks it, just off the east
+refraction coefficient of at least 0.094; with less, the curve of the Irish Sea itself blocks it, just off the east
 coast of the Isle of Man:
 
 | Distance | From | To | Least refraction coefficient |
 |---:|---|---|---:|
-| 231.9 km | Merrick (841 m) | Yr Wyddfa (1,073 m) | 0.097 |
-| 223.8 km | Carnedd Dafydd (1,041 m) | Merrick (841 m) | 0.045 |
-| 221.5 km | Yr Wyddfa (1,073 m) | Millfore (651 m) | 0.116 |
-| 217.9 km | Sawel (677 m) | Sron An Isean (959 m) | 0.127 |
+| 231.9 km | Merrick (841 m) | Yr Wyddfa (1,073 m) | 0.094 |
+| 223.8 km | Carnedd Dafydd (1,041 m) | Merrick (841 m) | 0.042 |
+| 221.5 km | Millfore (651 m) | Yr Wyddfa (1,073 m) | 0.116 |
+| 217.9 km | Sawel (677 m) | Sron An Isean (959 m) | 0.124 |
 | 217.7 km | Cross Fell (892 m) | Moel Llyfnant (744 m) | 0.121 |
 | 215.5 km | Cadair Idris (885 m) | Slieve Bearnagh (719 m) | 0.119 |
-| 213.2 km | Carnedd Dafydd (1,041 m) | Millfore (651 m) | 0.064 |
-| 213.1 km | Aran Benllyn (879 m) | Blackstairs Mountain (730 m) | 0.097 |
+| 214.9 km | Great Dun Fell (846 m) | Moelwyn Mawr (764 m) | 0.130 |
+| 213.2 km | Carnedd Dafydd (1,041 m) | Millfore (651 m) | 0.061 |
 
 ![The line of sight from Merrick to Yr Wyddfa, across the Irish Sea][merrick]
 
@@ -119,10 +120,10 @@ Scotland:
 | Distance | From | To | Least refraction coefficient |
 |---:|---|---|---:|
 | 255.1 km | Ben Cruachan (1,110 m) | Slieve Donard (846 m) | 0.236 |
-| 243.1 km | An Earagail (729 m) | Ben Cruachan (1,110 m) | 0.214 |
-| 242.9 km | Cairnsmore of Carsphairn (795 m) | Garnedd Ugain (1,062 m) | 0.201 |
+| 243.7 km | Cairnsmore of Carsphairn (795 m) | Yr Wyddfa (1,073 m) | 0.201 |
+| 243.1 km | An Earagail (729 m) | Ben Cruachan (1,110 m) | 0.212 |
+| 242.2 km | Blackcraig Hill (698 m) | Carnedd Llewelyn (1,059 m) | 0.250 |
 | 241.9 km | Ballencleuch Law (689 m) | Carnedd Llewelyn (1,059 m) | 0.247 |
-| 239.9 km | Carnedd Llewelyn (1,059 m) | Blacklorg Hill (679 m) | 0.239 |
 
 ![The line of sight from Ben Cruachan to Slieve Donard][cruachan]
 
