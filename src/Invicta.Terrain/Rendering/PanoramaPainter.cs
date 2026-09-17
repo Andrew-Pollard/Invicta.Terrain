@@ -82,10 +82,7 @@ public static class PanoramaPainter
         PaintCompass(canvas, font, panorama, LabelBandHeight + shownRows);
         PaintCredits(canvas, panorama.Width, height);
 
-        using SKImage image = surface.Snapshot();
-        using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using FileStream file = File.Create(path);
-        data.SaveTo(file);
+        PngFile.Save(surface, path);
     }
 
     private static int HighestTerrainRow(Panorama panorama)

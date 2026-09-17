@@ -66,10 +66,7 @@ public static class ViewshedPainter
         PaintViewpointAndScale(canvas, viewshed, size);
         PaintCredits(canvas, size);
 
-        using SKImage image = surface.Snapshot();
-        using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using FileStream file = File.Create(path);
-        data.SaveTo(file);
+        PngFile.Save(surface, path);
     }
 
     /// <summary>Samples the terrain height at the center of every pixel inside the viewshed's radius.</summary>

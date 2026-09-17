@@ -54,10 +54,7 @@ public static class ProfilePainter
         PaintAxes(canvas, font, profile, scale);
         PaintTitle(canvas, titleFont, font, profile, title);
 
-        using SKImage image = surface.Snapshot();
-        using SKData data = image.Encode(SKEncodedImageFormat.Png, 100);
-        using FileStream file = File.Create(path);
-        data.SaveTo(file);
+        PngFile.Save(surface, path);
     }
 
     private static void PaintPlot(SKCanvas canvas, SightLineProfile profile, Scale scale)
