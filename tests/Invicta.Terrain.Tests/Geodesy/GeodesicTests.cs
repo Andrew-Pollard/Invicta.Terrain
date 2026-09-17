@@ -79,35 +79,22 @@ internal sealed class GeodesicTests
     }
 
     [Test]
-    public void GetPosition_TestSet_MatchesPositionsAndAzimuths()
+    public void GetPosition_TestSet_MatchesPositions()
     {
         double worstPositionError = 0;
-        double worstAzimuthDisplacement = 0;
         foreach (ReferenceGeodesic reference in _testSet)
         {
             GeodesicLine line = new(reference.Start, reference.InitialAzimuth);
-            GeodesicPosition position = line.GetPosition(reference.Distance);
+            GeoCoordinate position = line.GetPosition(reference.Distance);
 
             double northError =
-                AngleErrorInRadians(position.Coordinate.Latitude, reference.End.Latitude) * Wgs84.EquatorialRadius;
-            double eastError = AngleErrorInRadians(position.Coordinate.Longitude, reference.End.Longitude)
+                AngleErrorInRadians(position.Latitude, reference.End.Latitude) * Wgs84.EquatorialRadius;
+            double eastError = AngleErrorInRadians(position.Longitude, reference.End.Longitude)
                 * Wgs84.EquatorialRadius * Math.Cos(reference.End.Latitude * Math.PI / 180);
             worstPositionError = Math.Max(worstPositionError, double.Hypot(northError, eastError));
-
-            // Near a pole the azimuth swings with the smallest change in position, so check it only elsewhere, as
-            // the sideways displacement it causes over one kilometer.
-            if (Math.Abs(reference.End.Latitude) < 89.9)
-            {
-                double azimuthDisplacement = AngleErrorInRadians(position.Azimuth, reference.FinalAzimuth) * 1000;
-                worstAzimuthDisplacement = Math.Max(worstAzimuthDisplacement, azimuthDisplacement);
-            }
         }
 
-        using (Assert.EnterMultipleScope())
-        {
-            Assert.That(worstPositionError, Is.LessThan(Tolerance));
-            Assert.That(worstAzimuthDisplacement, Is.LessThan(Tolerance));
-        }
+        Assert.That(worstPositionError, Is.LessThan(Tolerance));
     }
 
     private static double AngleErrorInRadians(double actual, double expected)

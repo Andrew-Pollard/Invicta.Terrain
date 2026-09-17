@@ -22,7 +22,7 @@ internal sealed class GeoBoundingBoxTests
         double east = double.NegativeInfinity;
         for (int i = 0; i < 36_000; i++)
         {
-            GeoCoordinate point = new GeodesicLine(center, i / 100.0).GetPosition(radius).Coordinate;
+            GeoCoordinate point = new GeodesicLine(center, i / 100.0).GetPosition(radius);
             double unwrappedLongitude = longitude + Math.IEEERemainder(point.Longitude - longitude, 360);
 
             south = Math.Min(south, point.Latitude);
@@ -68,7 +68,7 @@ internal sealed class GeoBoundingBoxTests
         int samples = (int)Math.Ceiling(path.Distance / 100);
         for (int i = 0; i <= samples; i++)
         {
-            GeoCoordinate point = line.GetPosition(path.Distance * i / samples).Coordinate;
+            GeoCoordinate point = line.GetPosition(path.Distance * i / samples);
             double unwrappedLongitude = startLongitude + Math.IEEERemainder(point.Longitude - startLongitude, 360);
 
             south = Math.Min(south, point.Latitude);

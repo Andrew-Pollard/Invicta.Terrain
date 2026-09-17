@@ -85,7 +85,7 @@ public static class ViewshedPainter
                 }
 
                 GeodesicLine line = new(viewshed.Viewpoint.Location, azimuth);
-                heights[(y * size) + x] = (float)terrain.GetElevation(line.GetPosition(distance).Coordinate);
+                heights[(y * size) + x] = (float)terrain.GetElevation(line.GetPosition(distance));
             }
         });
 

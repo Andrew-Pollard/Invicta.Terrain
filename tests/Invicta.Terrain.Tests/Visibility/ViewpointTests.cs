@@ -27,7 +27,7 @@ internal sealed class ViewpointTests
         double azimuth, double distance, double tolerance)
     {
         Viewpoint viewpoint = new(s_scotland, 1000, refractionCoefficient: 0);
-        GeoCoordinate target = new GeodesicLine(s_scotland, azimuth).GetPosition(distance).Coordinate;
+        GeoCoordinate target = new GeodesicLine(s_scotland, azimuth).GetPosition(distance);
 
         double angle = viewpoint.ApparentElevationAngle(target, 500, distance);
 
@@ -41,8 +41,8 @@ internal sealed class ViewpointTests
         // The meridian curves more tightly than the prime vertical, so a point 50 km north drops further than one
         // 50 km east. Checking the difference is resolved shows the test above is sensitive to the ellipsoid.
         Viewpoint viewpoint = new(s_scotland, 1000, refractionCoefficient: 0);
-        GeoCoordinate north = new GeodesicLine(s_scotland, 0).GetPosition(50_000).Coordinate;
-        GeoCoordinate east = new GeodesicLine(s_scotland, 90).GetPosition(50_000).Coordinate;
+        GeoCoordinate north = new GeodesicLine(s_scotland, 0).GetPosition(50_000);
+        GeoCoordinate east = new GeodesicLine(s_scotland, 90).GetPosition(50_000);
 
         double difference = viewpoint.ApparentElevationAngle(east, 500, 50_000)
             - viewpoint.ApparentElevationAngle(north, 500, 50_000);
@@ -61,7 +61,7 @@ internal sealed class ViewpointTests
     [Test]
     public void ApparentElevationAngle_WithRefraction_RaisesByDistanceTimesCoefficientOverTwiceRadius()
     {
-        GeoCoordinate target = new GeodesicLine(s_scotland, 30).GetPosition(200_000).Coordinate;
+        GeoCoordinate target = new GeodesicLine(s_scotland, 30).GetPosition(200_000);
         Viewpoint withoutRefraction = new(s_scotland, 1000, refractionCoefficient: 0);
         Viewpoint withRefraction = new(s_scotland, 1000, refractionCoefficient: 0.13);
 

@@ -20,7 +20,7 @@ internal sealed class SightLineProfileTests
     public void Trace_OverSea_ApparentHeightsFallWithCurvatureLessRefraction()
     {
         Viewpoint viewpoint = new(s_origin, EyeHeight, RefractionCoefficient);
-        GeoCoordinate target = new GeodesicLine(s_origin, 45).GetPosition(60_000).Coordinate;
+        GeoCoordinate target = new GeodesicLine(s_origin, 45).GetPosition(60_000);
 
         SightLineProfile profile = SightLineProfile.Trace(new SeaTerrain(), viewpoint, target, 0, 100, 61);
 
@@ -49,8 +49,8 @@ internal sealed class SightLineProfileTests
     public void Trace_BehindHill_TerrainRisesAboveTheLineOnlyWhenHidden(double targetHeight, bool expectVisible)
     {
         Viewpoint viewpoint = new(s_origin, 2, RefractionCoefficient);
-        HillTerrain terrain = new(new GeodesicLine(s_origin, 0).GetPosition(5_000).Coordinate);
-        GeoCoordinate target = new GeodesicLine(s_origin, 0).GetPosition(20_000).Coordinate;
+        HillTerrain terrain = new(new GeodesicLine(s_origin, 0).GetPosition(5_000));
+        GeoCoordinate target = new GeodesicLine(s_origin, 0).GetPosition(20_000);
 
         SightLineProfile profile = SightLineProfile.Trace(terrain, viewpoint, target, targetHeight, 15, 2001);
 

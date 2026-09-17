@@ -41,7 +41,7 @@ internal sealed class LineOfSightTerrainTests
         {
             GeoCoordinate first = RandomPoint(random);
             GeoCoordinate second = new GeodesicLine(first, random.NextDouble() * 360)
-                .GetPosition(200 + (random.NextDouble() * 4800)).Coordinate;
+                .GetPosition(200 + (random.NextDouble() * 4800));
 
             LineOfSightResult forward = TraceBetween(first, second);
             LineOfSightResult backward = TraceBetween(second, first);

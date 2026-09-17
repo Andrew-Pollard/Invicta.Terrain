@@ -52,7 +52,7 @@ internal sealed class LineOfSightTests
         // and adding the 70 m the Earth's curvature drops away there, a target must be about 747 m high to be seen.
         Viewpoint viewpoint = new(s_origin, 100, refractionCoefficient: 0);
         RidgeTerrain terrain = new(s_origin, ridgeDistance: 10_000, ridgeHeight: 300);
-        GeoCoordinate target = new GeodesicLine(s_origin, 60).GetPosition(30_000).Coordinate;
+        GeoCoordinate target = new GeodesicLine(s_origin, 60).GetPosition(30_000);
 
         LineOfSightResult result = LineOfSight.Trace(terrain, viewpoint, target, targetHeight, 15);
 
@@ -71,7 +71,7 @@ internal sealed class LineOfSightTests
         // makes the near edge of the top appear higher than its center, which hides a target on the ground there but
         // not a person standing there.
         Viewpoint viewpoint = new(s_origin, 1002);
-        GeoCoordinate summit = new GeodesicLine(s_origin, 45).GetPosition(40_000).Coordinate;
+        GeoCoordinate summit = new GeodesicLine(s_origin, 45).GetPosition(40_000);
         FlatTopTerrain terrain = new(summit, height: 1000, radius: 150);
 
         LineOfSightResult result = LineOfSight.Trace(terrain, viewpoint, summit, 1000 + heightAboveSummit, 15);
@@ -91,7 +91,7 @@ internal sealed class LineOfSightTests
 
     private static LineOfSightResult TraceOverSea(Viewpoint viewpoint, double distance, double targetHeight)
     {
-        GeoCoordinate target = new GeodesicLine(viewpoint.Location, 135).GetPosition(distance).Coordinate;
+        GeoCoordinate target = new GeodesicLine(viewpoint.Location, 135).GetPosition(distance);
 
         return LineOfSight.Trace(new SeaTerrain(), viewpoint, target, targetHeight, 100);
     }

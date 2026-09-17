@@ -74,7 +74,7 @@ internal sealed class SummitVisibilityTests
 
     private static GeoCoordinate At(double azimuth, double distance)
     {
-        return new GeodesicLine(s_origin, azimuth).GetPosition(distance).Coordinate;
+        return new GeodesicLine(s_origin, azimuth).GetPosition(distance);
     }
 
     /// <summary>Describes a conical hill.</summary>

@@ -19,7 +19,7 @@ internal sealed class TerrainRay(Viewpoint viewpoint, LayeredTerrain terrain, do
     /// <returns>The sample.</returns>
     public TerrainSample Sample(double distance)
     {
-        GeoCoordinate coordinate = _line.GetPosition(distance).Coordinate;
+        GeoCoordinate coordinate = _line.GetPosition(distance);
         double height = terrain.GetModel(distance).GetElevation(coordinate);
         double angle = viewpoint.ApparentElevationAngle(coordinate, height, distance);
 

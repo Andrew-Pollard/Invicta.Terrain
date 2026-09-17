@@ -78,9 +78,9 @@ public sealed class GeodesicLine
 
     /// <summary>Finds the point at a distance along the line.</summary>
     /// <param name="distance">The distance from the start in meters, which may be negative.</param>
-    /// <returns>The point, and the line's azimuth there.</returns>
+    /// <returns>The point, with its longitude from -180 to 180.</returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="distance"/> is not finite.</exception>
-    public GeodesicPosition GetPosition(double distance)
+    public GeoCoordinate GetPosition(double distance)
     {
         ArgumentChecks.ThrowIfNotFinite(distance);
 
@@ -107,10 +107,6 @@ public sealed class GeodesicLine
             cbet2 = csig2 = Geodesic.Tiny;
         }
 
-        // tan(alp0) = cos(sig2) tan(alp2), which needs no normalization.
-        double salp2 = _salp0;
-        double calp2 = _calp0 * csig2;
-
         // tan(omg2) = sin(alp0) tan(sig2), and omg12 = omg2 - omg1.
         double somg2 = _salp0 * ssig2;
         double comg2 = csig2;
@@ -122,6 +118,6 @@ public sealed class GeodesicLine
         double lon2 = Geodesic.NormalizeAngle(Geodesic.NormalizeAngle(_lon1) + Geodesic.NormalizeAngle(lon12));
         double lat2 = Geodesic.Atan2Degrees(sbet2, Geodesic.F1 * cbet2);
 
-        return new GeodesicPosition(new GeoCoordinate(lat2, lon2), Geodesic.Atan2Degrees(salp2, calp2));
+        return new GeoCoordinate(lat2, lon2);
     }
 }

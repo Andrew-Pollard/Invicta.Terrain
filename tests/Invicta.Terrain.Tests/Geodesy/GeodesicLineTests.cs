@@ -31,13 +31,13 @@ internal sealed class GeodesicLineTests
     {
         GeoCoordinate start = new(57, -5);
 
-        GeodesicPosition beyond = new GeodesicLine(start, 370).GetPosition(100_000);
-        GeodesicPosition equivalent = new GeodesicLine(start, 10).GetPosition(100_000);
+        GeoCoordinate beyond = new GeodesicLine(start, 370).GetPosition(100_000);
+        GeoCoordinate equivalent = new GeodesicLine(start, 10).GetPosition(100_000);
 
         using (Assert.EnterMultipleScope())
         {
-            Assert.That(beyond.Coordinate.Latitude, Is.EqualTo(equivalent.Coordinate.Latitude).Within(1e-12));
-            Assert.That(beyond.Coordinate.Longitude, Is.EqualTo(equivalent.Coordinate.Longitude).Within(1e-12));
+            Assert.That(beyond.Latitude, Is.EqualTo(equivalent.Latitude).Within(1e-12));
+            Assert.That(beyond.Longitude, Is.EqualTo(equivalent.Longitude).Within(1e-12));
         }
     }
 }

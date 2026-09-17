@@ -80,7 +80,7 @@ public readonly record struct GeoBoundingBox
         for (int i = 0; i < AroundAzimuthCount; i++)
         {
             GeodesicLine line = new(center, 360.0 * i / AroundAzimuthCount);
-            GeoCoordinate point = line.GetPosition(radius).Coordinate;
+            GeoCoordinate point = line.GetPosition(radius);
             double longitudeOffset = Math.IEEERemainder(point.Longitude - center.Longitude, 360);
 
             south = Math.Min(south, point.Latitude);
@@ -115,7 +115,7 @@ public readonly record struct GeoBoundingBox
         double eastOffset = Math.Max(0, Math.IEEERemainder(end.Longitude - start.Longitude, 360));
         for (int i = 1; i < intervals; i++)
         {
-            GeoCoordinate point = line.GetPosition(path.Distance * i / intervals).Coordinate;
+            GeoCoordinate point = line.GetPosition(path.Distance * i / intervals);
             double longitudeOffset = Math.IEEERemainder(point.Longitude - start.Longitude, 360);
 
             south = Math.Min(south, point.Latitude);
@@ -131,14 +131,14 @@ public readonly record struct GeoBoundingBox
     {
         return radius >= DistanceToPole(center, -90)
             ? -90
-            : new GeodesicLine(center, 180).GetPosition(radius).Coordinate.Latitude;
+            : new GeodesicLine(center, 180).GetPosition(radius).Latitude;
     }
 
     private static double NorthernmostLatitude(GeoCoordinate center, double radius)
     {
         return radius >= DistanceToPole(center, 90)
             ? 90
-            : new GeodesicLine(center, 0).GetPosition(radius).Coordinate.Latitude;
+            : new GeodesicLine(center, 0).GetPosition(radius).Latitude;
     }
 
     private static double DistanceToPole(GeoCoordinate center, double poleLatitude)
