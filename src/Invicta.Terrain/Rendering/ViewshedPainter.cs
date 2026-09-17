@@ -23,10 +23,6 @@ public static class ViewshedPainter
 {
     private const int CreditBandHeight = 22;
 
-    private const string Credits =
-        "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 "
-        + "provided under COPERNICUS by the European Union and ESA; all rights reserved.";
-
     private static readonly SKColor s_sea = new(170, 196, 220);
     private static readonly SKColor s_lowland = new(206, 214, 190);
     private static readonly SKColor s_upland = new(222, 208, 180);
@@ -116,13 +112,13 @@ public static class ViewshedPainter
             return s_outside;
         }
 
-        SKColor ground = height <= 0 ? s_sea : Blend(s_lowland, s_upland, Math.Clamp(height / 1000, 0, 1));
+        SKColor ground = height <= 0 ? s_sea : ColorMath.Blend(s_lowland, s_upland, Math.Clamp(height / 1000, 0, 1));
         double light = Hillshade(heights, size, x, y, viewshed.Resolution);
-        SKColor shaded = new(Scale(ground.Red, light), Scale(ground.Green, light), Scale(ground.Blue, light));
+        SKColor shaded = ColorMath.Shade(ground, light);
 
         (double distance, double azimuth) = ToPolar(viewshed, size, x, y);
 
-        return viewshed.IsVisible(distance, azimuth) ? Blend(shaded, s_visible, 0.6) : shaded;
+        return viewshed.IsVisible(distance, azimuth) ? ColorMath.Blend(shaded, s_visible, 0.6) : shaded;
     }
 
     /// <summary>Lights the terrain from the north-west, from the heights of the neighboring pixels.</summary>
@@ -194,25 +190,6 @@ public static class ViewshedPainter
         using SKPaint ink = new() { Color = s_ink.WithAlpha(170), IsAntialias = true };
         using SKFont font = new(SKTypeface.Default, 11);
 
-        canvas.DrawText(Credits, size - 8, size + CreditBandHeight - 7, SKTextAlign.Right, font, ink);
-    }
-
-    /// <summary>Mixes two colors, from all of the first at zero to all of the second at one.</summary>
-    private static SKColor Blend(SKColor first, SKColor second, double amount)
-    {
-        return new SKColor(
-            Mix(first.Red, second.Red, amount),
-            Mix(first.Green, second.Green, amount),
-            Mix(first.Blue, second.Blue, amount));
-    }
-
-    private static byte Mix(byte first, byte second, double amount)
-    {
-        return (byte)Math.Round(first + ((second - first) * amount));
-    }
-
-    private static byte Scale(byte channel, double factor)
-    {
-        return (byte)Math.Clamp(Math.Round(channel * factor), 0, 255);
+        canvas.DrawText(DataCredits.Copernicus, size - 8, size + CreditBandHeight - 7, SKTextAlign.Right, font, ink);
     }
 }

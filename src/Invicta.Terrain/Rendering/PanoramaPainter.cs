@@ -31,11 +31,6 @@ public static class PanoramaPainter
     // The sky kept above the highest terrain, in pixels.
     private const int SkyMargin = 40;
 
-    private const string Credits =
-        "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 "
-        + "provided under COPERNICUS by the European Union and ESA; all rights reserved. "
-        + "Summits © OpenStreetMap contributors.";
-
     private static readonly SKColor s_skyTop = new(96, 150, 210);
     private static readonly SKColor s_skyHorizon = new(214, 228, 240);
     private static readonly SKColor s_haze = new(190, 205, 222);
@@ -148,14 +143,14 @@ public static class PanoramaPainter
         if (IsRidgeLine(panorama, x, y, distance))
         {
             double nearness = Math.Exp(-distance / HazeDistance);
-            return Blend(s_haze, s_ridgeLine, nearness);
+            return ColorMath.Blend(s_haze, s_ridgeLine, nearness);
         }
 
         SKColor ground = HeightColor(panorama.GetTerrainHeight(x, y));
         double light = 0.35 + (0.65 * panorama.GetShading(x, y));
-        SKColor lit = new(Scale(ground.Red, light), Scale(ground.Green, light), Scale(ground.Blue, light));
+        SKColor lit = ColorMath.Shade(ground, light);
 
-        return Blend(s_haze, lit, Math.Exp(-distance / HazeDistance));
+        return ColorMath.Blend(s_haze, lit, Math.Exp(-distance / HazeDistance));
     }
 
     /// <summary>
@@ -178,7 +173,7 @@ public static class PanoramaPainter
     {
         double height = Math.Clamp(elevationAngle / Math.Max(1, topAngle), 0, 1);
 
-        return Blend(s_skyHorizon, s_skyTop, Math.Sqrt(height));
+        return ColorMath.Blend(s_skyHorizon, s_skyTop, Math.Sqrt(height));
     }
 
     private static SKColor HeightColor(double height)
@@ -189,7 +184,9 @@ public static class PanoramaPainter
             if (height < upperHeight)
             {
                 (double lowerHeight, SKColor lowerColor) = s_heightColors[i - 1];
-                return Blend(lowerColor, upperColor, Math.Max(0, (height - lowerHeight) / (upperHeight - lowerHeight)));
+                double amount = Math.Max(0, (height - lowerHeight) / (upperHeight - lowerHeight));
+
+                return ColorMath.Blend(lowerColor, upperColor, amount);
             }
         }
 
@@ -291,25 +288,7 @@ public static class PanoramaPainter
         using SKFont font = new(SKTypeface.Default, 12);
 
         canvas.DrawRect(0, height - CreditBandHeight, width, CreditBandHeight, background);
-        canvas.DrawText(Credits, width - 8, height - 7, SKTextAlign.Right, font, ink);
-    }
-
-    /// <summary>Mixes two colors, from all of the first at zero to all of the second at one.</summary>
-    private static SKColor Blend(SKColor first, SKColor second, double amount)
-    {
-        return new SKColor(
-            Mix(first.Red, second.Red, amount),
-            Mix(first.Green, second.Green, amount),
-            Mix(first.Blue, second.Blue, amount));
-    }
-
-    private static byte Mix(byte first, byte second, double amount)
-    {
-        return (byte)Math.Round(first + ((second - first) * amount));
-    }
-
-    private static byte Scale(byte channel, double factor)
-    {
-        return (byte)Math.Clamp(Math.Round(channel * factor), 0, 255);
+        string credits = $"{DataCredits.Copernicus} {DataCredits.OpenStreetMap}";
+        canvas.DrawText(credits, width - 8, height - 7, SKTextAlign.Right, font, ink);
     }
 }

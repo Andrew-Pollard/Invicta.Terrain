@@ -22,10 +22,6 @@ public static class ProfilePainter
     private const float TopMargin = 70;
     private const float BottomMargin = 70;
 
-    private const string Credits =
-        "Produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 "
-        + "provided under COPERNICUS by the European Union and ESA; all rights reserved.";
-
     private static readonly SKColor s_background = new(245, 245, 242);
     private static readonly SKColor s_sky = new(222, 234, 245);
     private static readonly SKColor s_sea = new(120, 160, 200);
@@ -184,7 +180,7 @@ public static class ProfilePainter
         canvas.DrawText(subtitle, LeftMargin, 56, SKTextAlign.Left, font, ink);
 
         using SKFont creditsFont = new(SKTypeface.Default, 11);
-        canvas.DrawText(Credits, Width - RightMargin, Height - 6, SKTextAlign.Right, creditsFont, faint);
+        canvas.DrawText(DataCredits.Copernicus, Width - RightMargin, Height - 6, SKTextAlign.Right, creditsFont, faint);
     }
 
     /// <summary>Rounds a rough step up to 1, 2 or 5 times a power of ten.</summary>
