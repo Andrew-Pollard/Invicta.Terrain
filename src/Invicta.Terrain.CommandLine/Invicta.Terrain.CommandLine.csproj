@@ -1,21 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AnalysisLevel>10.0-all</AnalysisLevel>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
     <RootNamespace>Invicta</RootNamespace>
+    <AssemblyName>invicta-terrain</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Invicta.Terrain.Tests" />
+    <ProjectReference Include="..\Invicta.Terrain\Invicta.Terrain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.660" />
-    <PackageReference Include="SkiaSharp" Version="4.152.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.12" />
   </ItemGroup>
 
 </Project>

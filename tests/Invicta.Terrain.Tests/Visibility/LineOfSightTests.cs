@@ -80,16 +80,6 @@ internal sealed class LineOfSightTests
         return LineOfSight.Trace(new SeaTerrain(), viewpoint, target, targetHeight, 100);
     }
 
-    /// <summary>Represents a smooth sea at sea level everywhere.</summary>
-    private sealed class SeaTerrain : IElevationModel
-    {
-        /// <inheritdoc/>
-        public double GetElevation(GeoCoordinate coordinate)
-        {
-            return 0;
-        }
-    }
-
     /// <summary>Represents flat ground at sea level with a circular ridge 100 m wide around a center.</summary>
     private sealed class RidgeTerrain(GeoCoordinate center, double ridgeDistance, double ridgeHeight) : IElevationModel
     {

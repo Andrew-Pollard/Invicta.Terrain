@@ -10,7 +10,7 @@ namespace Invicta.Visibility;
 /// <param name="viewpoint">The viewpoint the ray leaves.</param>
 /// <param name="terrain">The terrain to sample.</param>
 /// <param name="azimuth">The azimuth in degrees clockwise from north.</param>
-internal sealed class TerrainRay(Viewpoint viewpoint, IElevationModel terrain, double azimuth)
+internal sealed class TerrainRay(Viewpoint viewpoint, LayeredTerrain terrain, double azimuth)
 {
     private readonly GeodesicLine _line = new(viewpoint.Location, azimuth);
 
@@ -20,7 +20,7 @@ internal sealed class TerrainRay(Viewpoint viewpoint, IElevationModel terrain, d
     public TerrainSample Sample(double distance)
     {
         GeoCoordinate coordinate = _line.GetPosition(distance).Coordinate;
-        double height = terrain.GetElevation(coordinate);
+        double height = terrain.GetModel(distance).GetElevation(coordinate);
         double angle = viewpoint.ApparentElevationAngle(coordinate, height, distance);
 
         return new TerrainSample(distance, coordinate, height, angle);

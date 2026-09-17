@@ -51,8 +51,8 @@ public readonly record struct GeoBoundingBox
     /// <param name="center">The center.</param>
     /// <param name="radius">The distance in meters.</param>
     /// <returns>
-    /// A box containing the circle to within a meter or so, which spans every longitude if the circle contains a
-    /// pole.
+    /// A box containing the circle to within a meter per 450 km of radius, which spans every longitude if the circle
+    /// contains a pole.
     /// </returns>
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="radius"/> is negative or not finite.</exception>
     public static GeoBoundingBox Around(GeoCoordinate center, double radius)

@@ -1,6 +1,8 @@
 // © 2026 Andrew Pollard. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Runtime.CompilerServices;
+
 using Invicta.Geodesy;
 
 namespace Invicta.Elevation;
@@ -28,6 +30,9 @@ public sealed class CopernicusElevationModel : IElevationModel
 
     // Downloads and decoding run together; more at once would add little but load on the bucket.
     private const int MaxConcurrentLoads = 8;
+
+    // One arc-second of latitude, to the nearest meter.
+    private const double FullResolutionSpacing = 31;
 
     // Indexed by whole degrees of latitude and longitude, where null marks a tile that was not loaded.
     private readonly ElevationTile?[] _tiles = new ElevationTile?[180 * TileSlotsPerLatitude];
@@ -78,6 +83,62 @@ public sealed class CopernicusElevationModel : IElevationModel
         }).ConfigureAwait(false);
 
         return model;
+    }
+
+    /// <summary>
+    /// Loads the terrain around a center in layers, using each overview level from the distance at which its samples
+    /// are no further apart than the angular resolution spans.
+    /// </summary>
+    /// <param name="store">The store to take tiles from.</param>
+    /// <param name="center">The center, such as a viewpoint.</param>
+    /// <param name="radius">The distance in meters to load terrain to.</param>
+    /// <param name="angularResolution">The smallest angle in radians to resolve, such as a pixel.</param>
+    /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+    /// <returns>The terrain.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// <paramref name="radius"/> or <paramref name="angularResolution"/> is not positive and finite.
+    /// </exception>
+    public static async Task<LayeredTerrain> LoadLayeredAsync(
+        CopernicusTileStore store,
+        GeoCoordinate center,
+        double radius,
+        double angularResolution,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(store);
+
+        ThrowIfNotPositiveAndFinite(radius);
+
+        ThrowIfNotPositiveAndFinite(angularResolution);
+
+        List<TerrainLayer> layers = [];
+        for (int level = 0; level <= CopernicusGrid.OverviewLevelCount; level++)
+        {
+            double nextLevelSpacing = FullResolutionSpacing * (2 << level);
+            double reach = level == CopernicusGrid.OverviewLevelCount
+                ? radius
+                : Math.Min(radius, nextLevelSpacing / angularResolution);
+
+            GeoBoundingBox region = GeoBoundingBox.Around(center, reach);
+            CopernicusElevationModel model =
+                await LoadAsync(store, region, level, cancellationToken).ConfigureAwait(false);
+            layers.Add(new TerrainLayer(reach, model));
+            if (reach >= radius)
+            {
+                break;
+            }
+        }
+
+        return new LayeredTerrain(layers);
+    }
+
+    private static void ThrowIfNotPositiveAndFinite(
+        double value, [CallerArgumentExpression(nameof(value))] string? paramName = null)
+    {
+        if (!(value > 0) || double.IsPositiveInfinity(value))
+        {
+            throw new ArgumentOutOfRangeException(paramName, value, "The value must be positive and finite.");
+        }
     }
 
     private static IEnumerable<(int Latitude, int Longitude)> TilesCovering(GeoBoundingBox region)

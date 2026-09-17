@@ -45,7 +45,7 @@ public static class LineOfSight
         GeodesicSolution path = Geodesic.Inverse(viewpoint.Location, target);
         double targetAngle = viewpoint.ApparentElevationAngle(target, targetHeight, path.Distance);
 
-        TerrainRay ray = new(viewpoint, terrain, path.InitialAzimuth);
+        TerrainRay ray = new(viewpoint, LayeredTerrain.FromModel(terrain, path.Distance), path.InitialAzimuth);
         TerrainSample? obstruction = null;
         for (double distance = sampleSpacing; distance < path.Distance - (sampleSpacing / 2); distance += sampleSpacing)
         {
