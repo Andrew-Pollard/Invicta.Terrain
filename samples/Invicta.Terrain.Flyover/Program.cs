@@ -82,6 +82,16 @@ internal static class Program
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         RoutePath path = new(route.Waypoints);
+        if (path.Distance <= route.StopShortOf)
+        {
+            await Console.Error.WriteLineAsync(string.Create(
+                CultureInfo.InvariantCulture,
+                $"The route in {routeFile} is {path.Distance / 1000:F1} km long, too short to stop "
+                + $"{route.StopShortOf / 1000:F1} km before its end."));
+
+            return 1;
+        }
+
         GeoCoordinate middle = path.GetPosition(path.Distance / 2);
         double radius = route.Waypoints.Max(waypoint => Geodesic.Inverse(middle, waypoint).Distance)
             + route.ViewDistance;

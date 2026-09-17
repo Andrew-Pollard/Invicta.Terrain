@@ -86,6 +86,11 @@ internal sealed record Route
                 $"The speed, clearance, look ahead and view distance in {path} must all be positive.");
         }
 
+        if (!double.IsFinite(StopShortOf) || StopShortOf < 0)
+        {
+            throw new InvalidDataException($"The distance to stop short by in {path} must be zero or more.");
+        }
+
         if (TopAngle is <= -90 or > 90)
         {
             throw new InvalidDataException($"The top angle in {path} must be from -90° to 90°.");
