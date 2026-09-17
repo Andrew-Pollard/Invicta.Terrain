@@ -109,7 +109,15 @@ internal sealed record Route
                 throw new JsonException("A waypoint must be a [latitude, longitude] pair.");
             }
 
-            return new GeoCoordinate(pair[0], pair[1]);
+            try
+            {
+                return new GeoCoordinate(pair[0], pair[1]);
+            }
+            catch (ArgumentOutOfRangeException error)
+            {
+                // A coordinate off the globe is a fault in the file, so it is reported as one.
+                throw new JsonException(error.Message, error);
+            }
         }
 
         public override void Write(Utf8JsonWriter writer, GeoCoordinate value, JsonSerializerOptions options)
