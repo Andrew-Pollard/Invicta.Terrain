@@ -55,6 +55,19 @@ internal sealed class ViewshedTests
         Assert.That(viewshed.IsVisible(distance, azimuth), Is.EqualTo(expected));
     }
 
+    [TestCase(double.NaN)]
+    [TestCase(double.PositiveInfinity)]
+    [TestCase(-1.0)]
+    public void Compute_TargetHeightNegativeOrNotFinite_Throws(double targetHeight)
+    {
+        Viewpoint viewpoint = new(s_origin, 50);
+        LayeredTerrain terrain = LayeredTerrain.FromModel(new SeaTerrain(), 1000);
+
+        Assert.That(
+            () => Viewshed.Compute(terrain, viewpoint, 1000, 50, targetHeight, CancellationToken.None),
+            Throws.TypeOf<ArgumentOutOfRangeException>());
+    }
+
     /// <summary>Represents flat ground at sea level with a wall 100 m high and thick, running east to west.</summary>
     private sealed class WallTerrain(double distanceNorth) : IElevationModel
     {

@@ -51,7 +51,7 @@ public sealed class Viewshed
     /// <returns>The viewshed.</returns>
     /// <exception cref="ArgumentOutOfRangeException">
     /// <paramref name="radius"/> or <paramref name="resolution"/> is not positive and finite, or
-    /// <paramref name="targetHeight"/> is negative.
+    /// <paramref name="targetHeight"/> is negative or not finite.
     /// </exception>
     public static Viewshed Compute(
         LayeredTerrain terrain,
@@ -65,10 +65,11 @@ public sealed class Viewshed
 
         ArgumentNullException.ThrowIfNull(viewpoint);
 
-        ThrowIfNotPositiveAndFinite(radius, nameof(radius));
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(radius);
 
-        ThrowIfNotPositiveAndFinite(resolution, nameof(resolution));
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(resolution);
 
+        ArgumentChecks.ThrowIfNotFinite(targetHeight);
         ArgumentOutOfRangeException.ThrowIfNegative(targetHeight);
 
         // Neighboring rays are one resolution apart at the edge.
@@ -107,14 +108,6 @@ public sealed class Viewshed
         BitArray samples = _rays[ray];
 
         return sample < samples.Length && samples[sample];
-    }
-
-    private static void ThrowIfNotPositiveAndFinite(double value, string paramName)
-    {
-        if (!(value > 0) || double.IsPositiveInfinity(value))
-        {
-            throw new ArgumentOutOfRangeException(paramName, value, "The value must be positive and finite.");
-        }
     }
 
     private void ComputeRay(LayeredTerrain terrain, int rayIndex, double targetHeight)

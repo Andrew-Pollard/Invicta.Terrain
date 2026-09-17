@@ -22,10 +22,7 @@ public readonly record struct GeoCoordinate
             throw new ArgumentOutOfRangeException(nameof(latitude), latitude, "The latitude must be from -90 to 90.");
         }
 
-        if (!double.IsFinite(longitude))
-        {
-            throw new ArgumentOutOfRangeException(nameof(longitude), longitude, "The longitude must be finite.");
-        }
+        ArgumentChecks.ThrowIfNotFinite(longitude);
 
         Latitude = latitude;
         Longitude = longitude;

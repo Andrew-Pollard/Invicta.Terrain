@@ -34,10 +34,7 @@ public sealed class GeodesicLine
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="azimuth"/> is not finite.</exception>
     public GeodesicLine(GeoCoordinate start, double azimuth)
     {
-        if (!double.IsFinite(azimuth))
-        {
-            throw new ArgumentOutOfRangeException(nameof(azimuth), azimuth, "The azimuth must be finite.");
-        }
+        ArgumentChecks.ThrowIfNotFinite(azimuth);
 
         _lon1 = start.Longitude;
 
@@ -85,10 +82,7 @@ public sealed class GeodesicLine
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="distance"/> is not finite.</exception>
     public GeodesicPosition GetPosition(double distance)
     {
-        if (!double.IsFinite(distance))
-        {
-            throw new ArgumentOutOfRangeException(nameof(distance), distance, "The distance must be finite.");
-        }
+        ArgumentChecks.ThrowIfNotFinite(distance);
 
         // tau2 = tau1 + tau12, and sig12 follows from reverting the distance series.
         double tau12 = distance / (Geodesic.PolarRadius * (1 + _a1m1));

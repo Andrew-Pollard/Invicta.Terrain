@@ -32,18 +32,12 @@ public static class LineOfSight
         IElevationModel terrain, Viewpoint viewpoint, GeoCoordinate target, double targetHeight, double sampleSpacing)
     {
         ArgumentNullException.ThrowIfNull(terrain);
+
         ArgumentNullException.ThrowIfNull(viewpoint);
 
-        if (!double.IsFinite(targetHeight))
-        {
-            throw new ArgumentOutOfRangeException(nameof(targetHeight), targetHeight, "The height must be finite.");
-        }
+        ArgumentChecks.ThrowIfNotFinite(targetHeight);
 
-        if (!(sampleSpacing > 0) || double.IsPositiveInfinity(sampleSpacing))
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(sampleSpacing), sampleSpacing, "The spacing must be positive and finite.");
-        }
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(sampleSpacing);
 
         GeodesicSolution path = Geodesic.Inverse(viewpoint.Location, target);
         double targetAngle = viewpoint.ApparentElevationAngle(target, targetHeight, path.Distance);

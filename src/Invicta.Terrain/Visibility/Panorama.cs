@@ -91,10 +91,7 @@ public sealed class Panorama
                 nameof(options), "The angles must be from -90° to 90°, with the top above the bottom.");
         }
 
-        if (!(options.MaximumDistance > 0) || double.IsPositiveInfinity(options.MaximumDistance))
-        {
-            throw new ArgumentOutOfRangeException(nameof(options), "The maximum distance must be positive and finite.");
-        }
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(options.MaximumDistance);
     }
 
     /// <summary>

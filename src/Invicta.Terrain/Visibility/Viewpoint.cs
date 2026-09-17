@@ -39,10 +39,7 @@ public sealed class Viewpoint
     public Viewpoint(
         GeoCoordinate location, double height, double refractionCoefficient = StandardRefractionCoefficient)
     {
-        if (!double.IsFinite(height))
-        {
-            throw new ArgumentOutOfRangeException(nameof(height), height, "The height must be finite.");
-        }
+        ArgumentChecks.ThrowIfNotFinite(height);
 
         // Written so that NaN fails the check too.
         if (!(refractionCoefficient < 1) || double.IsNegativeInfinity(refractionCoefficient))

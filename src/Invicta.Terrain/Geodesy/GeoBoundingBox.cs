@@ -57,11 +57,8 @@ public readonly record struct GeoBoundingBox
     /// <exception cref="ArgumentOutOfRangeException"><paramref name="radius"/> is negative or not finite.</exception>
     public static GeoBoundingBox Around(GeoCoordinate center, double radius)
     {
+        ArgumentChecks.ThrowIfNotFinite(radius);
         ArgumentOutOfRangeException.ThrowIfNegative(radius);
-        if (!double.IsFinite(radius))
-        {
-            throw new ArgumentOutOfRangeException(nameof(radius), radius, "The radius must be finite.");
-        }
 
         double westernmost = center.Longitude - 180;
         double easternmost = center.Longitude + 180;

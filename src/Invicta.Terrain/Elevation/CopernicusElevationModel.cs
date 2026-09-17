@@ -1,8 +1,6 @@
 // © 2026 Andrew Pollard. All rights reserved.
 // Licensed under the MIT License.
 
-using System.Runtime.CompilerServices;
-
 using Invicta.Geodesy;
 
 namespace Invicta.Elevation;
@@ -138,9 +136,9 @@ public sealed class CopernicusElevationModel : IElevationModel
     {
         ArgumentNullException.ThrowIfNull(store);
 
-        ThrowIfNotPositiveAndFinite(radius);
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(radius);
 
-        ThrowIfNotPositiveAndFinite(angularResolution);
+        ArgumentChecks.ThrowIfNotPositiveAndFinite(angularResolution);
 
         List<TerrainLayer> layers = [];
         for (int level = 0; level <= CopernicusGrid.OverviewLevelCount; level++)
@@ -161,15 +159,6 @@ public sealed class CopernicusElevationModel : IElevationModel
         }
 
         return new LayeredTerrain(layers);
-    }
-
-    private static void ThrowIfNotPositiveAndFinite(
-        double value, [CallerArgumentExpression(nameof(value))] string? paramName = null)
-    {
-        if (!(value > 0) || double.IsPositiveInfinity(value))
-        {
-            throw new ArgumentOutOfRangeException(paramName, value, "The value must be positive and finite.");
-        }
     }
 
     /// <inheritdoc/>
