@@ -16,7 +16,7 @@ namespace Invicta;
 
 /// <summary>
 /// Searches Great Britain, Ireland and the Isle of Man for the longest lines of sight between named summits, and
-/// writes the results as a Markdown table.
+/// writes the results as Markdown tables with profiles of the longest.
 /// </summary>
 internal static class Program
 {
@@ -163,7 +163,6 @@ internal static class Program
             for (int j = i + 1; j < summits.Count; j++)
             {
                 SearchSummit to = summits[j];
-                // Either summit may be the one looked from, so allow an eye above both.
                 double reach = HorizonDistance(from.Height + EyeHeight) + HorizonDistance(to.Height + EyeHeight);
                 if (ApproximateDistance(from.Coordinate, to.Coordinate) > reach * 1.01)
                 {
