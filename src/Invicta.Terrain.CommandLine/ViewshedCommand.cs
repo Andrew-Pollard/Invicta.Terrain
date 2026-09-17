@@ -52,7 +52,7 @@ internal static class ViewshedCommand
 
             // Rays are sampled every half pixel, so use the coarsest overview whose samples are that close.
             Stopwatch stopwatch = Stopwatch.StartNew();
-            int level = OverviewLevelFor(pixelSize / 2);
+            int level = CopernicusElevationModel.CoarsestOverviewLevelFor(pixelSize / 2);
             GeoBoundingBox region = GeoBoundingBox.Around(location, radiusMeters);
             CopernicusElevationModel model =
                 await CopernicusElevationModel.LoadAsync(store, region, level, cancellationToken);
@@ -77,20 +77,5 @@ internal static class ViewshedCommand
         });
 
         return command;
-    }
-
-    private static int OverviewLevelFor(double sampleSpacing)
-    {
-        // Each level doubles the full resolution's spacing of about 31 m, and there are three overviews.
-        const double FullResolutionSpacing = 31;
-        const int CoarsestLevel = 3;
-
-        int level = 0;
-        while (level < CoarsestLevel && FullResolutionSpacing * (2 << level) <= sampleSpacing)
-        {
-            level++;
-        }
-
-        return level;
     }
 }

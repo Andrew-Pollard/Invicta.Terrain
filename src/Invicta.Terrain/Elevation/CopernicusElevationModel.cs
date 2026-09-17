@@ -83,6 +83,20 @@ public sealed class CopernicusElevationModel : IElevationModel
         return model;
     }
 
+    /// <summary>Gets the coarsest overview level whose samples are no further apart than a spacing.</summary>
+    /// <param name="spacing">The greatest distance in meters that samples may be apart.</param>
+    /// <returns>The overview level, from 0, full resolution, to 3.</returns>
+    public static int CoarsestOverviewLevelFor(double spacing)
+    {
+        int level = 0;
+        while (level < CopernicusGrid.OverviewLevelCount && FullResolutionSpacing * (2 << level) <= spacing)
+        {
+            level++;
+        }
+
+        return level;
+    }
+
     /// <summary>
     /// Loads the terrain around a center in layers, using each overview level from the distance at which its samples
     /// are no further apart than the angular resolution spans.
