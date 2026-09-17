@@ -46,6 +46,7 @@ public sealed class OpenStreetMapSummitStore
     internal OpenStreetMapSummitStore(string directory, HttpClient httpClient, TimeSpan retryDelay)
     {
         ArgumentException.ThrowIfNullOrEmpty(directory);
+
         ArgumentNullException.ThrowIfNull(httpClient);
 
         _directory = directory;

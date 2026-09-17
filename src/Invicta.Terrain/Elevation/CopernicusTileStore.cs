@@ -30,6 +30,7 @@ public sealed class CopernicusTileStore
     public CopernicusTileStore(string directory, HttpClient httpClient)
     {
         ArgumentException.ThrowIfNullOrEmpty(directory);
+
         ArgumentNullException.ThrowIfNull(httpClient);
 
         _directory = directory;

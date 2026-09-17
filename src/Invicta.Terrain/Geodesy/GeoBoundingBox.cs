@@ -27,6 +27,7 @@ public readonly record struct GeoBoundingBox
         GeoCoordinate northEast = new(north, east);
 
         ArgumentOutOfRangeException.ThrowIfGreaterThan(south, north);
+
         ArgumentOutOfRangeException.ThrowIfGreaterThan(west, east);
 
         South = southWest.Latitude;
