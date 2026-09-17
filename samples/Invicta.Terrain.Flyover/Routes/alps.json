@@ -1,0 +1,15 @@
+// A straight flight from the Chamonix valley to the Matterhorn, over the Mont Blanc massif and the Valais Alps.
+// It stops short of the Matterhorn, which would otherwise pass below the camera without ever being in view.
+{
+  "name": "Chamonix to the Matterhorn",
+  "speed": 2800,
+  "clearance": 900,
+  "lookAhead": 7000,
+  "topAngle": 7,
+  "viewDistance": 60000,
+  "stopShortOf": 6000,
+  "waypoints": [
+    [45.92370, 6.86940],
+    [45.97640, 7.65860]
+  ]
+}

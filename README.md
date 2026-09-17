@@ -150,15 +150,24 @@ someone standing on Ben Nevis could see, over hillshaded terrain with the sea an
 
 ## Flyovers
 
-`samples/Invicta.Terrain.Flyover` renders the frames of a flight from Chamonix to the Matterhorn, 55 km across the
-Alps, each frame the view ahead from a moving camera. A panorama can span less than the full circle, so a frame is a
-60° view 1,280 pixels wide, a sixth of the work of a whole turn at the same resolution. The 1,200 frames of a
-20-second flight take 86 s to render once the data is cached.
+`samples/Invicta.Terrain.Flyover` renders the frames of a flight along a route, each frame the view ahead from a
+moving camera. A panorama can span less than the full circle, so a frame is a 60° view 1,280 pixels wide, a sixth of
+the work of a whole turn at the same resolution. A frame takes about 60 ms once the data is cached, so a flight of
+1,200 frames renders in under two minutes.
+
+```bash
+invicta-terrain-flyover Routes/grand-canyon.json .cache frames
+```
 
 ![The Matterhorn at the end of the flight, with Monte Rosa behind it][matterhorn]
 
-- **The camera:** it stays 900 m above the highest ground within 7 km ahead, averaged across neighbouring frames so
-  that it climbs gradually rather than in steps, and faces along the route.
+- **The routes:** a route is a JSON file of waypoints and the camera's settings, so a new flight needs no code. Two
+  come with the sample: `alps.json` flies 55 km from Chamonix to the Matterhorn, and `grand-canyon.json` follows
+  39 km of the Colorado River through the Grand Canyon, its waypoints taken from OpenStreetMap.
+- **The camera:** it stays the route's clearance above the highest ground within its look-ahead distance, averaged
+  across neighbouring frames so that it climbs and turns gradually. Over the Alps that is 900 m above the ground
+  7 km ahead, which carries it over the ridges; down the Colorado it is 350 m above the ground 1.6 km ahead, which
+  keeps it between the walls of the gorge instead of climbing over the rim.
 - **The summits:** each frame names the most prominent summits it shows, leaving out any whose label would overlap
   one already placed. Naming them per frame makes the labels flicker a little as summits come in and out of view.
 - **The video:** the sample writes JPEG frames for a video tool to assemble.
@@ -166,6 +175,8 @@ Alps, each frame the view ahead from a moving camera. A panorama can span less t
 ```bash
 ffmpeg -framerate 60 -i frame%05d.jpg -c:v libx264 -crf 20 -pix_fmt yuv420p flyover.mp4
 ```
+
+![Flying down the Colorado between the walls of the Grand Canyon][canyon]
 
 ## Accuracy and limitations
 
@@ -200,6 +211,7 @@ Open Database License.
 [merrick-wikipedia]: https://en.wikipedia.org/wiki/Merrick_(Galloway)
 [cruachan]: docs/images/ben-cruachan-to-slieve-donard.png
 [matterhorn]: docs/images/chamonix-to-matterhorn.jpg
+[canyon]: docs/images/grand-canyon.jpg
 [copernicus]: https://registry.opendata.aws/copernicus-dem/
 [osm]: https://www.openstreetmap.org/copyright
 [overpass]: https://wiki.openstreetmap.org/wiki/Overpass_API
