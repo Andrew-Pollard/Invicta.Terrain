@@ -174,10 +174,11 @@ public static class ProfilePainter
         using SKPaint faint = new() { Color = s_ink.WithAlpha(150), IsAntialias = true };
         LineOfSightResult result = profile.Result;
 
-        double clearanceSeconds = result.Clearance * 180 / Math.PI * 3600;
+        // A visible target on a summit only just clears its own near slope, so how far it clears says little.
+        double shortfallSeconds = -result.Clearance * 180 / Math.PI * 3600;
         string verdict = result.IsVisible
-            ? Format($"visible, clearing everything by {clearanceSeconds:0.0}″")
-            : Format($"hidden {result.Obstruction?.Distance / 1000:0.0} km out, by {-clearanceSeconds:0.0}″");
+            ? "visible"
+            : Format($"hidden {result.Obstruction?.Distance / 1000:0.0} km out, by {shortfallSeconds:0.0}″");
         string subtitle = Format($"{result.Distance / 1000:0.0} km, {verdict}");
         canvas.DrawText(title, LeftMargin, 32, SKTextAlign.Left, titleFont, ink);
         canvas.DrawText(subtitle, LeftMargin, 56, SKTextAlign.Left, font, ink);

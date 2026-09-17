@@ -1,15 +1,172 @@
 # Invicta.Terrain
 
-A .NET library and command-line tool that answers the hill walker's question "what am I looking at?": it renders
-labelled panoramas of real terrain, maps where a place can be seen from, and searches for the longest lines of sight.
+What can you see from the top of a hill? Invicta.Terrain answers from real elevation data: it renders the 360° view
+from any point with the visible summits named, draws the profile of a line of sight between two points, maps the
+ground visible from a point, and searches a region for its longest lines of sight.
 
-Work in progress; [PLAN.md][plan] describes the goals and how they will be met.
+![The view north-east from Ben Nevis, with the Cairngorms on the horizon][ben-nevis]
+
+Elevations come from the [Copernicus GLO-30 DEM][copernicus], 30 m data covering the world, downloaded tile by tile
+from its public bucket. Summit names come from [OpenStreetMap][osm] through the [Overpass API][overpass]. Both are
+downloaded once and kept in a cache folder.
+
+Requires .NET 10.
+
+## Command-line tool
+
+`src/Invicta.Terrain.CommandLine` builds `invicta-terrain`. Each command downloads what it needs on first use, into
+`%LOCALAPPDATA%\Invicta.Terrain` unless `--cache` says otherwise.
+
+- **`panorama`:** renders the 360° view from a point as a PNG, with visible summits labelled. From Ben Nevis, to 450 km
+  at 7,200 × 400 pixels, it takes 2.4 s once the data is cached.
+- **`profile`:** traces the line of sight between two points and draws it as a cross-section.
+- **`viewshed`:** maps the ground visible from a point.
+
+```bash
+invicta-terrain panorama --lat 56.79685 --lon -5.00351 -o ben-nevis.png
+```
+
+```bash
+invicta-terrain profile --from-lat 55.13901 --from-lon -4.46821 --to-lat 53.06864 --to-lon -4.07626 -o profile.png
+```
+
+```bash
+invicta-terrain viewshed --lat 56.79685 --lon -5.00351 --radius 60 --resolution 60 -o viewshed.png
+```
+
+## Library
+
+`src/Invicta.Terrain` holds everything the tool does, in four namespaces.
+
+- **`Invicta.Geodesy`:** distances, azimuths and positions on the WGS 84 ellipsoid, ported from
+  [GeographicLib][geographiclib] and accurate to 15 nm.
+- **`Invicta.Elevation`:** Copernicus tiles and their overviews, interpolated bilinearly across tile edges.
+- **`Invicta.Visibility`:** lines of sight, panoramas, viewsheds and profiles.
+- **`Invicta.Rendering`:** PNG images of those, drawn with [SkiaSharp][skiasharp].
+
+```csharp
+using HttpClient httpClient = new();
+CopernicusTileStore tiles = new(cacheDirectory, httpClient);
+
+GeoCoordinate benNevis = new(56.79685, -5.00351);
+GeoCoordinate cairnGorm = new(57.11667, -3.64389);
+CopernicusElevationModel terrain = await CopernicusElevationModel.LoadAsync(
+    tiles, new GeoBoundingBox(56.7, -5.1, 57.2, -3.6), overviewLevel: 0, cancellationToken);
+
+Viewpoint viewpoint = Viewpoint.AboveTerrain(terrain, benNevis, heightAboveTerrain: 2);
+LineOfSightResult result = LineOfSight.Trace(
+    terrain, viewpoint, cairnGorm, terrain.GetElevation(cairnGorm), sampleSpacing: 15);
+```
+
+## How it works
+
+- **Geometry:** elevation angles come from the Earth-centred positions of both points on the WGS 84 ellipsoid, so the
+  Earth's curvature is exact in every direction rather than the usual d²/2R approximation.
+- **Refraction:** air bends light down around the Earth, raising a point at distance d by kd/2R. The coefficient k is
+  0.13 by default, the value used in geodetic surveying; in practice it varies widely with the weather and the time of
+  day, and is largest in the cold, still air around dawn.
+- **Panoramas:** each column marches outward along its azimuth, filling pixels from the bottom up as terrain rises into
+  view, with steps that grow with distance. Beyond a few tens of kilometres it reads the tiles' averaged overviews,
+  which are fine enough for a pixel's width and a fraction of the memory.
+- **Labels:** a summit is labelled when the pixels where it would appear show terrain at its distance, so the labels
+  agree with the picture.
+
+## A 443 km line of sight
+
+At dawn on 16 July 2016, Marc Bret of the [Beyond Horizons][beyond-horizons] team photographed Pic Gaspard in the French
+Alps from Pic de Finestrelles in the Pyrenees, 443 km away, crediting favourable refraction. The line skims the curve of
+the Earth across the Gulf of Lion, so whether it clears does depend on refraction.
+`RecordLineOfSightTests` reproduces it:
+
+| Refraction coefficient | Result |
+|---|---|
+| 0.10 to 0.13 | Blocked 167 km out by a 122 m hill near Agde |
+| 0.14 to 0.15 | Blocked 229 km out by 82 m ground near Nîmes |
+| 0.16 and above | Visible |
+
+![The line of sight from Pic de Finestrelles to Pic Gaspard, crossing the Gulf of Lion][profile]
+
+## Longest lines of sight in Great Britain and Ireland
+
+`samples/Invicta.Terrain.LongestSightLines` searches every pair of named summits of at least 300 m in Great Britain,
+Ireland and the Isle of Man, 11,746 summits in all. It keeps the 5 million pairs over 150 km apart whose horizons
+could meet, traces each both ways at full resolution with the eye 2 m above the summit, and finds the least refraction
+coefficient that lets each way see the other summit. The search takes 25 minutes on 16 threads. The tables leave out
+lines whose ends are both within 10 km of a longer line's ends, which are usually the same view.
+
+With standard refraction, the longest is Merrick in Galloway to Yr Wyddfa (Snowdon), at 231.9 km, which agrees with
+the [232 km line between them][merrick-wikipedia] long cited as the longest in the British Isles. It needs a
+refraction coefficient of at least 0.097; with less, the curve of the Irish Sea itself blocks it, just off the east
+coast of the Isle of Man:
+
+| Distance | From | To | Least refraction coefficient |
+|---:|---|---|---:|
+| 231.9 km | Merrick (841 m) | Yr Wyddfa (1,073 m) | 0.097 |
+| 223.8 km | Carnedd Dafydd (1,041 m) | Merrick (841 m) | 0.045 |
+| 221.5 km | Yr Wyddfa (1,073 m) | Millfore (651 m) | 0.116 |
+| 217.9 km | Sawel (677 m) | Sron An Isean (959 m) | 0.127 |
+| 217.7 km | Cross Fell (892 m) | Moel Llyfnant (744 m) | 0.121 |
+| 215.5 km | Cadair Idris (885 m) | Slieve Bearnagh (719 m) | 0.119 |
+| 213.2 km | Carnedd Dafydd (1,041 m) | Millfore (651 m) | 0.064 |
+| 213.1 km | Aran Benllyn (879 m) | Blackstairs Mountain (730 m) | 0.097 |
+
+![The line of sight from Merrick to Yr Wyddfa, across the Irish Sea][merrick]
+
+Heights are the terrain model's, at the highest point within 60 m of each mapped summit. With stronger refraction,
+such as in the cold, still air around dawn, the lines grow to over 250 km, and more cross between Ireland and
+Scotland:
+
+| Distance | From | To | Least refraction coefficient |
+|---:|---|---|---:|
+| 255.1 km | Ben Cruachan (1,110 m) | Slieve Donard (846 m) | 0.236 |
+| 243.1 km | An Earagail (729 m) | Ben Cruachan (1,110 m) | 0.214 |
+| 242.9 km | Cairnsmore of Carsphairn (795 m) | Garnedd Ugain (1,062 m) | 0.201 |
+| 241.9 km | Ballencleuch Law (689 m) | Carnedd Llewelyn (1,059 m) | 0.247 |
+| 239.9 km | Carnedd Llewelyn (1,059 m) | Blacklorg Hill (679 m) | 0.239 |
+
+![The line of sight from Ben Cruachan to Slieve Donard][cruachan]
+
+## Viewsheds
+
+![The ground visible from Ben Nevis, within 60 km][viewshed]
+
+## Accuracy and limitations
+
+- **Surface model:** GLO-30 measures the surface, including forests and buildings, and smooths sharp summits: it puts
+  Ben Nevis at 1,343 m against a surveyed 1,345 m, but Pic Gaspard at 3,785 m against 3,883 m.
+- **Refraction:** the largest uncertainty in any long line of sight, as the table above shows.
+- **Heights:** the data's heights above the EGM2008 geoid are treated as heights above the ellipsoid. Over a view the
+  difference changes by a few metres, which moves angles far less than refraction does.
+- **Summits:** only named `natural=peak` nodes in OpenStreetMap are labelled.
+
+## Tests
+
+`tests/Invicta.Terrain.Tests` checks the geometry against independent answers: GeographicLib's test set of 10,000
+geodesics, a sphere with the ellipsoid's curvature, horizon distances over a smooth sea, and conical hills. Tests in the
+`DownloadedData` category download data on first run; exclude them with `--filter TestCategory!=DownloadedData`.
 
 ## Licence
 
 Released under the [MIT License][license]. The notices for the projects this repository draws on are in
 [THIRD-PARTY-NOTICES.md][notices].
 
-[plan]: PLAN.md
+Images made from the elevation data carry the notice its licence requires: produced using Copernicus WorldDEM-30 © DLR
+e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA;
+all rights reserved. The organisations in charge of the Copernicus programme by law or by delegation do not incur any
+liability for any use of the Copernicus WorldDEM-30. Summit names are © OpenStreetMap contributors, available under the
+Open Database License.
+
+[ben-nevis]: docs/images/ben-nevis-north-east.png
+[profile]: docs/images/finestrelles-to-gaspard.png
+[viewshed]: docs/images/ben-nevis-viewshed.png
+[merrick]: docs/images/merrick-to-yr-wyddfa.png
+[merrick-wikipedia]: https://en.wikipedia.org/wiki/Merrick_(Galloway)
+[cruachan]: docs/images/ben-cruachan-to-slieve-donard.png
+[copernicus]: https://registry.opendata.aws/copernicus-dem/
+[osm]: https://www.openstreetmap.org/copyright
+[overpass]: https://wiki.openstreetmap.org/wiki/Overpass_API
+[geographiclib]: https://geographiclib.sourceforge.io/
+[skiasharp]: https://github.com/mono/SkiaSharp
+[beyond-horizons]: https://beyondrange.wordpress.com/2016/08/03/pic-de-finestrelles-pic-gaspard-ecrins-443-km/
 [license]: LICENSE
 [notices]: THIRD-PARTY-NOTICES.md

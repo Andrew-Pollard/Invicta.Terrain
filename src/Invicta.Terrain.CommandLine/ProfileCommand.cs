@@ -73,11 +73,14 @@ internal static class ProfileCommand
             ProfilePainter.SavePng(profile, title, result.GetRequiredValue(output).FullName);
 
             LineOfSightResult trace = profile.Result;
-            string verdict = trace.IsVisible ? "visible" : "hidden";
-            double clearanceSeconds = trace.Clearance * 180 / Math.PI * 3600;
-            Console.WriteLine(string.Create(
-                CultureInfo.InvariantCulture,
-                $"{trace.Distance / 1000:0.00} km, {verdict}, clearance {clearanceSeconds:0.0} arc-seconds."));
+            string distance = string.Create(CultureInfo.InvariantCulture, $"{trace.Distance / 1000:0.00} km");
+            string verdict = trace.IsVisible || trace.Obstruction is not { } obstruction
+                ? "visible"
+                : string.Create(
+                    CultureInfo.InvariantCulture,
+                    $"hidden by {obstruction.Coordinate} ({obstruction.Height:0} m), "
+                    + $"{obstruction.Distance / 1000:0.0} km out");
+            Console.WriteLine($"{distance}, {verdict}.");
 
             return 0;
         });
