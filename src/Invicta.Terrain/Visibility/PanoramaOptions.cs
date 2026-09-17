@@ -6,7 +6,10 @@ namespace Invicta.Visibility;
 /// <summary>Specifies the extent and resolution of a <see cref="Panorama"/>.</summary>
 public sealed record PanoramaOptions
 {
-    /// <summary>Gets the width in pixels of the view. The default is 7,200, each spanning 0.05°.</summary>
+    /// <summary>
+    /// Gets the width in pixels of the view, which with the field of view sets how much each pixel spans, across and
+    /// up. The default is 7,200, which spans the default full circle at 0.05° a pixel.
+    /// </summary>
     public int Width { get; init; } = 7200;
 
     /// <summary>
