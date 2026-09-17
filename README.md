@@ -161,13 +161,16 @@ invicta-terrain-flyover Routes/grand-canyon.json .cache frames
 
 ![The Matterhorn at the end of the flight, with Monte Rosa behind it][matterhorn]
 
-- **The routes:** a route is a JSON file of waypoints and the camera's settings, so a new flight needs no code. Two
-  come with the sample: `alps.json` flies 55 km from Chamonix to the Matterhorn, and `grand-canyon.json` follows
-  39 km of the Colorado River through the Grand Canyon, its waypoints taken from OpenStreetMap.
+- **The routes:** a route is a JSON file of waypoints and the camera's settings, so a new flight needs no code. Three
+  come with the sample: `alps.json` flies 55 km from Chamonix to the Matterhorn, `grand-canyon.json` follows 39 km of
+  the Colorado River through the Grand Canyon, and `norwegian-fjords.json` runs 36 km from Flåm up the Aurlandsfjord
+  into the Nærøyfjord. The two that follow water take their waypoints from OpenStreetMap: the river itself, and the
+  Flåm to Gudvangen ferry.
 - **The camera:** it stays the route's clearance above the highest ground within its look-ahead distance, averaged
   across neighbouring frames so that it climbs and turns gradually. Over the Alps that is 900 m above the ground
   7 km ahead, which carries it over the ridges; down the Colorado it is 350 m above the ground 1.6 km ahead, which
-  keeps it between the walls of the gorge instead of climbing over the rim.
+  keeps it between the walls of the gorge instead of climbing over the rim; along the fjords it is 300 m above the
+  water, with the frame tilted further up again to take in walls that rise 1,300 m from it.
 - **The summits:** each frame names the most prominent summits it shows, leaving out any whose label would overlap
   one already placed. Naming them per frame makes the labels flicker a little as summits come in and out of view.
 - **The video:** the sample writes JPEG frames for a video tool to assemble.
@@ -177,6 +180,8 @@ ffmpeg -framerate 60 -i frame%05d.jpg -c:v libx264 -crf 20 -pix_fmt yuv420p flyo
 ```
 
 ![Flying down the Colorado between the walls of the Grand Canyon][canyon]
+
+![The end of the flight, in the Nærøyfjord at Gudvangen][fjords]
 
 ## Accuracy and limitations
 
@@ -212,6 +217,7 @@ Open Database License.
 [cruachan]: docs/images/ben-cruachan-to-slieve-donard.png
 [matterhorn]: docs/images/chamonix-to-matterhorn.jpg
 [canyon]: docs/images/grand-canyon.jpg
+[fjords]: docs/images/norwegian-fjords.jpg
 [copernicus]: https://registry.opendata.aws/copernicus-dem/
 [osm]: https://www.openstreetmap.org/copyright
 [overpass]: https://wiki.openstreetmap.org/wiki/Overpass_API

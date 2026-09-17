@@ -38,6 +38,9 @@ public static class PanoramaPainter
     private static readonly SKColor s_ink = new(30, 34, 40);
     private static readonly SKColor s_paper = new(245, 245, 242);
 
+    // Water, which the terrain model puts at exactly sea level.
+    private static readonly SKColor s_water = new(128, 158, 186);
+
     // Terrain colors by height, from lowland greens through bare rock to the snow of the high mountains.
     private static readonly (double Height, SKColor Color)[] s_heightColors =
     [
@@ -177,6 +180,11 @@ public static class PanoramaPainter
 
     private static SKColor HeightColor(double height)
     {
+        if (height <= 0)
+        {
+            return s_water;
+        }
+
         for (int i = 1; i < s_heightColors.Length; i++)
         {
             (double upperHeight, SKColor upperColor) = s_heightColors[i];
