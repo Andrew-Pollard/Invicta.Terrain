@@ -18,7 +18,7 @@ internal sealed class OpenStreetMapSummitStoreTests
     private string _directory = null!;
 
     [SetUp]
-    public void CreateDirectory()
+    public void ChooseUnusedDirectory()
     {
         _directory = Path.Combine(Path.GetTempPath(), "Invicta.Terrain.Tests", Guid.NewGuid().ToString("N"));
     }
