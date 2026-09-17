@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 using Invicta.Elevation;
 using Invicta.Geodesy;
+using Invicta.Places;
 using Invicta.Rendering;
 using Invicta.Visibility;
 
@@ -63,7 +64,15 @@ internal static class PanoramaCommand
             Console.WriteLine(
                 $"Rendered {panorama.Width} x {panorama.Height} pixels in {stopwatch.Elapsed.TotalSeconds:F1} s.");
 
-            PanoramaPainter.SavePng(panorama, result.GetRequiredValue(output).FullName);
+            stopwatch.Restart();
+            OpenStreetMapSummitStore summitStore = CommonOptions.CreateSummitStore(result.GetRequiredValue(cache));
+            GeoBoundingBox region = GeoBoundingBox.Around(location, options.MaximumDistance);
+            IReadOnlyList<Summit> summits = await summitStore.GetSummitsAsync(region, cancellationToken);
+            IReadOnlyList<VisibleSummit> visible = SummitVisibility.FindVisible(panorama, terrain, summits);
+            Console.WriteLine(
+                $"Found {visible.Count} of {summits.Count} summits visible in {stopwatch.Elapsed.TotalSeconds:F1} s.");
+
+            PanoramaPainter.SavePng(panorama, visible, result.GetRequiredValue(output).FullName);
 
             return 0;
         });
