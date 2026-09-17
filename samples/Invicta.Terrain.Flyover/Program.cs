@@ -92,6 +92,12 @@ internal static class Program
             return 1;
         }
 
+        int removed = RemoveFramesOfEarlierFlight(frameDirectory);
+        if (removed > 0)
+        {
+            Report(stopwatch, $"Removed {removed} frames of an earlier flight.");
+        }
+
         GeoCoordinate middle = path.GetPosition(path.Distance / 2);
         double radius = route.Waypoints.Max(waypoint => Geodesic.Inverse(middle, waypoint).Distance)
             + route.ViewDistance;
@@ -124,6 +130,30 @@ internal static class Program
         Report(stopwatch, $"Wrote the frames to {frameDirectory}.");
 
         return 0;
+    }
+
+    /// <summary>
+    /// Deletes the frames this sample wrote before, so that a shorter flight does not leave the tail of a longer one
+    /// for a video tool to read as its own.
+    /// </summary>
+    /// <param name="frameDirectory">The directory the frames are written to.</param>
+    /// <returns>How many frames were deleted.</returns>
+    private static int RemoveFramesOfEarlierFlight(string frameDirectory)
+    {
+        int removed = 0;
+        foreach (string file in Directory.GetFiles(frameDirectory, "frame*.jpg"))
+        {
+            string name = Path.GetFileNameWithoutExtension(file);
+            bool ours = name.Length == 10
+                && int.TryParse(name.AsSpan(5), NumberStyles.None, CultureInfo.InvariantCulture, out _);
+            if (ours)
+            {
+                File.Delete(file);
+                removed++;
+            }
+        }
+
+        return removed;
     }
 
     /// <summary>
