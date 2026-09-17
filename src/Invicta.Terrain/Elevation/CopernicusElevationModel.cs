@@ -37,18 +37,16 @@ public sealed class CopernicusElevationModel : IElevationModel
     // Indexed by whole degrees of latitude and longitude, where null marks a tile that was not loaded.
     private readonly ElevationTile?[] _tiles = new ElevationTile?[180 * TileSlotsPerLatitude];
 
+    private readonly int _overviewLevel;
     private readonly int _rowsPerDegree;
     private readonly double _rowOffset;
 
     private CopernicusElevationModel(int overviewLevel)
     {
-        OverviewLevel = overviewLevel;
+        _overviewLevel = overviewLevel;
         _rowsPerDegree = CopernicusGrid.RowsPerDegree(overviewLevel);
         _rowOffset = CopernicusGrid.SampleOffset(1.0 / CopernicusGrid.RowsPerDegree(0), overviewLevel);
     }
-
-    /// <summary>Gets the overview level, where zero is full resolution and each level halves it.</summary>
-    public int OverviewLevel { get; }
 
     /// <summary>Loads the tiles that cover a region, downloading any that are not yet in the store.</summary>
     /// <param name="store">The store to take tiles from.</param>
@@ -185,9 +183,9 @@ public sealed class CopernicusElevationModel : IElevationModel
         }
 
         int rowInTile = (int)(((tileLatitude + 1) * _rowsPerDegree) - row);
-        int columnsPerDegree = CopernicusGrid.ColumnsPerDegree((int)tileLatitude, OverviewLevel);
+        int columnsPerDegree = CopernicusGrid.ColumnsPerDegree((int)tileLatitude, _overviewLevel);
         double fullResolutionSpacing = 1.0 / CopernicusGrid.ColumnsPerDegree((int)tileLatitude, 0);
-        double columnOffset = CopernicusGrid.SampleOffset(fullResolutionSpacing, OverviewLevel);
+        double columnOffset = CopernicusGrid.SampleOffset(fullResolutionSpacing, _overviewLevel);
 
         double columnPosition = (longitude - columnOffset) * columnsPerDegree;
         double westColumn = Math.Floor(columnPosition);

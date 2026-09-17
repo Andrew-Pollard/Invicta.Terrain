@@ -39,12 +39,11 @@ public sealed class GeodesicLine
             throw new ArgumentOutOfRangeException(nameof(azimuth), azimuth, "The azimuth must be finite.");
         }
 
-        Start = start;
-        Azimuth = Geodesic.NormalizeAngle(azimuth);
         _lon1 = start.Longitude;
 
         // Rounding the azimuth guards against underflow in salp0.
-        Geodesic.SinCosDegrees(Geodesic.RoundAngle(Azimuth), out double salp1, out double calp1);
+        Geodesic.SinCosDegrees(
+            Geodesic.RoundAngle(Geodesic.NormalizeAngle(azimuth)), out double salp1, out double calp1);
         Geodesic.ReducedLatitude(Geodesic.RoundAngle(start.Latitude), out double sbet1, out double cbet1);
 
         // sin(alp0) = sin(alp1) cos(bet1), and the hypotenuse form of cos(alp0) behaves better when salp1 is zero.
@@ -79,12 +78,6 @@ public sealed class GeodesicLine
         _a3c = -Geodesic.Flattening * _salp0 * Geodesic.A3(eps);
         _b31 = Geodesic.SinCosSeries(true, _ssig1, _csig1, _c3a, Geodesic.SeriesOrder - 1);
     }
-
-    /// <summary>Gets the point where the line starts.</summary>
-    public GeoCoordinate Start { get; }
-
-    /// <summary>Gets the azimuth at the start in degrees clockwise from north, from -180 to 180.</summary>
-    public double Azimuth { get; }
 
     /// <summary>Finds the point at a distance along the line.</summary>
     /// <param name="distance">The distance from the start in meters, which may be negative.</param>

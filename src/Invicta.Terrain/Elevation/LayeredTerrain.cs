@@ -35,9 +35,6 @@ public sealed class LayeredTerrain
         }
     }
 
-    /// <summary>Gets the distance in meters that the furthest layer reaches.</summary>
-    public double MaximumDistance => _layers[^1].MaximumDistance;
-
     /// <summary>Creates terrain of a single layer.</summary>
     /// <param name="model">The elevation model.</param>
     /// <param name="maximumDistance">The distance in meters that the model covers.</param>

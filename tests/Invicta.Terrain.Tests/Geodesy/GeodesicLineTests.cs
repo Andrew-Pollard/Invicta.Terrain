@@ -27,10 +27,17 @@ internal sealed class GeodesicLineTests
     }
 
     [Test]
-    public void Azimuth_OutsideHalfTurn_IsNormalized()
+    public void GetPosition_AzimuthBeyondFullTurn_MatchesEquivalentAzimuth()
     {
-        GeodesicLine line = new(new GeoCoordinate(0, 0), 370);
+        GeoCoordinate start = new(57, -5);
 
-        Assert.That(line.Azimuth, Is.EqualTo(10).Within(1e-12));
+        GeodesicPosition beyond = new GeodesicLine(start, 370).GetPosition(100_000);
+        GeodesicPosition equivalent = new GeodesicLine(start, 10).GetPosition(100_000);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(beyond.Coordinate.Latitude, Is.EqualTo(equivalent.Coordinate.Latitude).Within(1e-12));
+            Assert.That(beyond.Coordinate.Longitude, Is.EqualTo(equivalent.Coordinate.Longitude).Within(1e-12));
+        }
     }
 }

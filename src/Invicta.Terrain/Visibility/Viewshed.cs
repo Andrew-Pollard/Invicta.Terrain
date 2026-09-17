@@ -19,14 +19,16 @@ namespace Invicta.Visibility;
 public sealed class Viewshed
 {
     private readonly BitArray[] _rays;
+    private readonly double _azimuthStep;
+    private readonly double _sampleSpacing;
 
     private Viewshed(Viewpoint viewpoint, double radius, double resolution, int rayCount)
     {
         Viewpoint = viewpoint;
         Radius = radius;
         Resolution = resolution;
-        AzimuthStep = 360.0 / rayCount;
-        SampleSpacing = resolution / 2;
+        _azimuthStep = 360.0 / rayCount;
+        _sampleSpacing = resolution / 2;
         _rays = new BitArray[rayCount];
     }
 
@@ -38,12 +40,6 @@ public sealed class Viewshed
 
     /// <summary>Gets the spacing in meters that the viewshed resolves at its edge.</summary>
     public double Resolution { get; }
-
-    /// <summary>Gets the angle in degrees between neighboring rays.</summary>
-    public double AzimuthStep { get; }
-
-    /// <summary>Gets the distance in meters between samples along each ray.</summary>
-    public double SampleSpacing { get; }
 
     /// <summary>Computes the ground visible from a viewpoint.</summary>
     /// <param name="terrain">The terrain, reaching <paramref name="radius"/>.</param>
@@ -99,13 +95,13 @@ public sealed class Viewshed
             return false;
         }
 
-        int sample = (int)Math.Round(distance / SampleSpacing) - 1;
+        int sample = (int)Math.Round(distance / _sampleSpacing) - 1;
         if (sample < 0)
         {
             return true;
         }
 
-        int ray = (int)Math.Round(azimuth / AzimuthStep);
+        int ray = (int)Math.Round(azimuth / _azimuthStep);
         ray = ((ray % _rays.Length) + _rays.Length) % _rays.Length;
 
         BitArray samples = _rays[ray];
@@ -123,14 +119,14 @@ public sealed class Viewshed
 
     private void ComputeRay(LayeredTerrain terrain, int rayIndex, double targetHeight)
     {
-        TerrainRay ray = new(Viewpoint, terrain, rayIndex * AzimuthStep);
-        int sampleCount = (int)Math.Floor(Radius / SampleSpacing);
+        TerrainRay ray = new(Viewpoint, terrain, rayIndex * _azimuthStep);
+        int sampleCount = (int)Math.Floor(Radius / _sampleSpacing);
         BitArray visible = new(sampleCount);
 
         double highestAngle = double.NegativeInfinity;
         for (int i = 0; i < sampleCount; i++)
         {
-            double distance = (i + 1) * SampleSpacing;
+            double distance = (i + 1) * _sampleSpacing;
             TerrainSample sample = ray.Sample(distance);
 
             // A target above the ground is seen over the terrain before it, but blocks nothing itself.
