@@ -77,7 +77,7 @@ internal sealed class LineOfSightTerrainTests
         double longitudeRange = s_region.East - s_region.West - (2 * Inset);
 
         return new GeoCoordinate(
-            s_region.South + Inset + (random.NextDouble() * height),
+            s_region.South + Inset + (random.NextDouble() * latitudeRange),
             s_region.West + Inset + (random.NextDouble() * longitudeRange));
     }
 }
