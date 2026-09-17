@@ -201,8 +201,12 @@ public static class ProfilePainter
     }
 
     /// <summary>Maps distances and apparent heights onto the plot.</summary>
+    /// <param name="Distance">The distance in meters at the right edge.</param>
+    /// <param name="Bottom">The apparent height in meters at the bottom edge.</param>
+    /// <param name="Top">The apparent height in meters at the top edge.</param>
     private readonly record struct Scale(double Distance, double Bottom, double Top)
     {
+        /// <summary>Creates a scale that fits the whole profile, with a margin above and below.</summary>
         public static Scale Fit(SightLineProfile profile)
         {
             double top = Math.Max(profile.EyeHeight, profile.TargetApparentHeight);
@@ -218,11 +222,13 @@ public static class ProfilePainter
             return new Scale(profile.Result.Distance, bottom - margin, top + margin);
         }
 
+        /// <summary>Gets the horizontal position on the canvas of a distance along the profile.</summary>
         public float X(double distance)
         {
             return LeftMargin + (float)(distance / Distance * (Width - LeftMargin - RightMargin));
         }
 
+        /// <summary>Gets the vertical position on the canvas of an apparent height.</summary>
         public float Y(double height)
         {
             double fraction = (height - Bottom) / (Top - Bottom);
