@@ -57,7 +57,7 @@ public sealed class Panorama
     public double LeftEdgeAzimuth { get; }
 
     /// <summary>Gets a value indicating whether the view spans a full circle, so that its edges meet.</summary>
-    public bool CoversFullCircle => HorizontalFieldOfView >= 360;
+    internal bool CoversFullCircle => HorizontalFieldOfView >= 360;
 
     /// <summary>Gets the angle in degrees that each pixel spans, across and up.</summary>
     public double PixelAngle { get; }
