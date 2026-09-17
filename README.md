@@ -130,7 +130,8 @@ Scotland:
 ## Viewsheds
 
 A viewshed is the ground that can be seen from a point. The map below shades orange everything within 60 km that
-someone standing on Ben Nevis could see, over hillshaded terrain with the sea and lochs in blue.
+someone standing on Ben Nevis could see, over hillshaded terrain with the sea in blue. The data records water only at
+sea level, so the sea lochs are blue while the freshwater lochs of the Great Glen are not.
 
 ![The ground visible from Ben Nevis, within 60 km][viewshed]
 
