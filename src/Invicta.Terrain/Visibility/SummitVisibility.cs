@@ -13,8 +13,9 @@ public static class SummitVisibility
     // Closer summits are the ground the viewer stands on, not something to label.
     private const double MinimumDistance = 200;
 
-    // Mapped summit positions can be a few tens of meters off the terrain model's highest point.
-    private const double SummitSearchRadius = 30;
+    // Mapped summit positions can be a few tens of meters off the terrain model's highest point, so search a
+    // 3 × 3 grid of points this far apart around each.
+    private const double SummitSearchSpacing = 30;
 
     /// <summary>Finds the summits that a panorama shows, as opposed to those hidden behind nearer terrain.</summary>
     /// <param name="panorama">The panorama.</param>
@@ -57,7 +58,7 @@ public static class SummitVisibility
         }
 
         IElevationModel model = terrain.GetModel(path.Distance);
-        double height = model.FindHighestPoint(summit.Coordinate, SummitSearchRadius, SummitSearchRadius).Height;
+        double height = model.FindHighestPoint(summit.Coordinate, SummitSearchSpacing, SummitSearchSpacing).Height;
         double angle = viewpoint.ApparentElevationAngle(summit.Coordinate, height, path.Distance) * 180 / Math.PI;
         double azimuth = path.InitialAzimuth < 0 ? path.InitialAzimuth + 360 : path.InitialAzimuth;
 
