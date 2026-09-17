@@ -8,8 +8,6 @@ namespace Invicta.Elevation;
 /// <summary>Provides searches of an <see cref="IElevationModel"/>.</summary>
 public static class ElevationModelExtensions
 {
-    private const double MetersPerDegreeOfLatitude = 111_320;
-
     /// <summary>
     /// Finds the highest terrain in a square around a point, such as the top of a summit whose mapped position is a
     /// little off.
@@ -32,17 +30,13 @@ public static class ElevationModelExtensions
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(spacing);
 
         int steps = (int)Math.Floor(halfWidth / spacing);
-        double latitudeStep = spacing / MetersPerDegreeOfLatitude;
-        double longitudeStep = latitudeStep / Math.Max(0.01, Math.Cos(center.Latitude * Math.PI / 180));
-
         GeoCoordinate highest = center;
         double highestHeight = model.GetElevation(center);
         for (int north = -steps; north <= steps; north++)
         {
             for (int east = -steps; east <= steps; east++)
             {
-                double latitude = Math.Clamp(center.Latitude + (north * latitudeStep), -90, 90);
-                GeoCoordinate point = new(latitude, center.Longitude + (east * longitudeStep));
+                GeoCoordinate point = center.Offset(north * spacing, east * spacing);
                 double height = model.GetElevation(point);
                 if (height > highestHeight)
                 {

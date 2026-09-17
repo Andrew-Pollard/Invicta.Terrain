@@ -34,6 +34,23 @@ public readonly record struct GeoCoordinate
     /// <summary>Gets the longitude in degrees, positive to the east.</summary>
     public double Longitude { get; }
 
+    /// <summary>
+    /// Gets the point a short distance away, treating the ground as flat, as for sampling the terrain around a point.
+    /// </summary>
+    /// <param name="north">The distance in meters to the north, negative to the south.</param>
+    /// <param name="east">The distance in meters to the east, negative to the west.</param>
+    /// <returns>The point, to within 1% of the distances, stopping at the poles.</returns>
+    internal GeoCoordinate Offset(double north, double east)
+    {
+        const double MetersPerDegreeOfLatitude = 111_320;
+
+        double latitude = Math.Clamp(Latitude + (north / MetersPerDegreeOfLatitude), -90, 90);
+        double metersPerDegreeOfLongitude =
+            MetersPerDegreeOfLatitude * Math.Max(0.01, Math.Cos(Latitude * Math.PI / 180));
+
+        return new GeoCoordinate(latitude, Longitude + (east / metersPerDegreeOfLongitude));
+    }
+
     /// <summary>Returns the coordinate as latitude and longitude in decimal degrees.</summary>
     /// <returns>The latitude and longitude, such as <c>56.79685, -5.00360</c>.</returns>
     public override string ToString()

@@ -146,19 +146,11 @@ public sealed class Panorama
     /// <summary>Computes the hillshade at a sample from the terrain's slope, measured over a given distance.</summary>
     private static double Shade(IElevationModel model, TerrainSample sample, double baseline)
     {
-        const double MetersPerDegreeOfLatitude = 111_320;
-
         GeoCoordinate center = sample.Coordinate;
-        double latitudeStep = baseline / MetersPerDegreeOfLatitude;
-        double longitudeStep = latitudeStep / Math.Max(0.01, Math.Cos(center.Latitude * Math.PI / 180));
-
-        double northLatitude = Math.Min(90, center.Latitude + latitudeStep);
-        double southLatitude = Math.Max(-90, center.Latitude - latitudeStep);
-
-        double east = model.GetElevation(new GeoCoordinate(center.Latitude, center.Longitude + longitudeStep));
-        double west = model.GetElevation(new GeoCoordinate(center.Latitude, center.Longitude - longitudeStep));
-        double north = model.GetElevation(new GeoCoordinate(northLatitude, center.Longitude));
-        double south = model.GetElevation(new GeoCoordinate(southLatitude, center.Longitude));
+        double east = model.GetElevation(center.Offset(0, baseline));
+        double west = model.GetElevation(center.Offset(0, -baseline));
+        double north = model.GetElevation(center.Offset(baseline, 0));
+        double south = model.GetElevation(center.Offset(-baseline, 0));
 
         double slopeEast = (east - west) / (2 * baseline);
         double slopeNorth = (north - south) / (2 * baseline);
