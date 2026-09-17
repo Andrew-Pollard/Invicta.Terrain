@@ -83,6 +83,25 @@ public sealed class CopernicusElevationModel : IElevationModel
         return model;
     }
 
+    private static IEnumerable<(int Latitude, int Longitude)> TilesCovering(GeoBoundingBox region)
+    {
+        int south = Math.Max(-90, (int)Math.Floor(region.South - LoadMargin));
+        int north = Math.Min(89, (int)Math.Floor(region.North + LoadMargin));
+        int west = (int)Math.Floor(region.West - LoadMargin);
+        int east = (int)Math.Floor(region.East + LoadMargin);
+
+        // A region wider than the world would otherwise list some tiles twice.
+        east = Math.Min(east, west + TileSlotsPerLatitude - 1);
+
+        for (int latitude = south; latitude <= north; latitude++)
+        {
+            for (int longitude = west; longitude <= east; longitude++)
+            {
+                yield return (latitude, NormalizeTileLongitude(longitude));
+            }
+        }
+    }
+
     /// <summary>Gets the coarsest overview level whose samples are no further apart than a spacing.</summary>
     /// <param name="spacing">The greatest distance in meters that samples may be apart.</param>
     /// <returns>The overview level, from 0, full resolution, to 3.</returns>
@@ -150,25 +169,6 @@ public sealed class CopernicusElevationModel : IElevationModel
         if (!(value > 0) || double.IsPositiveInfinity(value))
         {
             throw new ArgumentOutOfRangeException(paramName, value, "The value must be positive and finite.");
-        }
-    }
-
-    private static IEnumerable<(int Latitude, int Longitude)> TilesCovering(GeoBoundingBox region)
-    {
-        int south = Math.Max(-90, (int)Math.Floor(region.South - LoadMargin));
-        int north = Math.Min(89, (int)Math.Floor(region.North + LoadMargin));
-        int west = (int)Math.Floor(region.West - LoadMargin);
-        int east = (int)Math.Floor(region.East + LoadMargin);
-
-        // A region wider than the world would otherwise list some tiles twice.
-        east = Math.Min(east, west + TileSlotsPerLatitude - 1);
-
-        for (int latitude = south; latitude <= north; latitude++)
-        {
-            for (int longitude = west; longitude <= east; longitude++)
-            {
-                yield return (latitude, NormalizeTileLongitude(longitude));
-            }
         }
     }
 

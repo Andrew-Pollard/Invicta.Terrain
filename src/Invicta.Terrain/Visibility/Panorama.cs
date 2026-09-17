@@ -80,49 +80,6 @@ public sealed class Panorama
         return panorama;
     }
 
-    /// <summary>Gets the azimuth in degrees at the center of a column.</summary>
-    /// <param name="x">The column.</param>
-    /// <returns>The azimuth, clockwise from north.</returns>
-    public double AzimuthAt(double x)
-    {
-        return (x + 0.5) * PixelAngle;
-    }
-
-    /// <summary>Gets the elevation angle in degrees at the center of a row.</summary>
-    /// <param name="y">The row.</param>
-    /// <returns>The elevation angle.</returns>
-    public double ElevationAngleAt(double y)
-    {
-        return TopAngle - ((y + 0.5) * PixelAngle);
-    }
-
-    /// <summary>Gets the distance to the terrain a pixel shows.</summary>
-    /// <param name="x">The column.</param>
-    /// <param name="y">The row.</param>
-    /// <returns>The distance in meters, or <see cref="double.NaN"/> if the pixel shows sky.</returns>
-    public double GetDistance(int x, int y)
-    {
-        return _distances[Index(x, y)];
-    }
-
-    /// <summary>Gets the height of the terrain a pixel shows.</summary>
-    /// <param name="x">The column.</param>
-    /// <param name="y">The row.</param>
-    /// <returns>The height in meters above sea level, or zero if the pixel shows sky.</returns>
-    public double GetTerrainHeight(int x, int y)
-    {
-        return _heights[Index(x, y)];
-    }
-
-    /// <summary>Gets how brightly sunlight from the north-west lights the terrain a pixel shows.</summary>
-    /// <param name="x">The column.</param>
-    /// <param name="y">The row.</param>
-    /// <returns>The brightness from 0, facing away from the sun, to 1, facing it.</returns>
-    public double GetShading(int x, int y)
-    {
-        return _shading[Index(x, y)];
-    }
-
     private static void ThrowIfInvalid(PanoramaOptions options)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(options.Width, 4, nameof(options));
@@ -210,6 +167,49 @@ public sealed class Panorama
         double slopeNorth = (north - south) / (2 * baseline);
 
         return Hillshade.Brightness(slopeEast, slopeNorth);
+    }
+
+    /// <summary>Gets the azimuth in degrees at the center of a column.</summary>
+    /// <param name="x">The column.</param>
+    /// <returns>The azimuth, clockwise from north.</returns>
+    public double AzimuthAt(double x)
+    {
+        return (x + 0.5) * PixelAngle;
+    }
+
+    /// <summary>Gets the elevation angle in degrees at the center of a row.</summary>
+    /// <param name="y">The row.</param>
+    /// <returns>The elevation angle.</returns>
+    public double ElevationAngleAt(double y)
+    {
+        return TopAngle - ((y + 0.5) * PixelAngle);
+    }
+
+    /// <summary>Gets the distance to the terrain a pixel shows.</summary>
+    /// <param name="x">The column.</param>
+    /// <param name="y">The row.</param>
+    /// <returns>The distance in meters, or <see cref="double.NaN"/> if the pixel shows sky.</returns>
+    public double GetDistance(int x, int y)
+    {
+        return _distances[Index(x, y)];
+    }
+
+    /// <summary>Gets the height of the terrain a pixel shows.</summary>
+    /// <param name="x">The column.</param>
+    /// <param name="y">The row.</param>
+    /// <returns>The height in meters above sea level, or zero if the pixel shows sky.</returns>
+    public double GetTerrainHeight(int x, int y)
+    {
+        return _heights[Index(x, y)];
+    }
+
+    /// <summary>Gets how brightly sunlight from the north-west lights the terrain a pixel shows.</summary>
+    /// <param name="x">The column.</param>
+    /// <param name="y">The row.</param>
+    /// <returns>The brightness from 0, facing away from the sun, to 1, facing it.</returns>
+    public double GetShading(int x, int y)
+    {
+        return _shading[Index(x, y)];
     }
 
     private int Index(int x, int y)
