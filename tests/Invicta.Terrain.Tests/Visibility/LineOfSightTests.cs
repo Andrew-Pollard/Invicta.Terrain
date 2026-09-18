@@ -20,7 +20,7 @@ internal sealed class LineOfSightTests
         // Over a smooth sea the horizon is at sqrt(2Rh / (1 - k)), where refraction stretches the effective radius.
         const double EyeHeight = 1000;
         Viewpoint viewpoint = new(s_origin, EyeHeight, refractionCoefficient);
-        double horizon = Math.Sqrt(2 * 6_371_000 * EyeHeight / (1 - refractionCoefficient));
+        double horizon = double.Sqrt(2 * 6_371_000 * EyeHeight / (1 - refractionCoefficient));
 
         LineOfSightResult near = TraceOverSea(viewpoint, 0.97 * horizon, 0);
         LineOfSightResult far = TraceOverSea(viewpoint, 1.03 * horizon, 0);
@@ -104,7 +104,7 @@ internal sealed class LineOfSightTests
         {
             double distance = Geodesic.Inverse(center, coordinate).Distance;
 
-            return Math.Abs(distance - ridgeDistance) <= 50 ? ridgeHeight : 0;
+            return double.Abs(distance - ridgeDistance) <= 50 ? ridgeHeight : 0;
         }
     }
 

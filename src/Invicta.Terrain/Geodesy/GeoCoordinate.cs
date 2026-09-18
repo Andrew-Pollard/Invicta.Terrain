@@ -44,9 +44,9 @@ public readonly record struct GeoCoordinate
     {
         const double MetersPerDegreeOfLatitude = 111_320;
 
-        double latitude = Math.Clamp(Latitude + (north / MetersPerDegreeOfLatitude), -90, 90);
+        double latitude = double.Clamp(Latitude + (north / MetersPerDegreeOfLatitude), -90, 90);
         double metersPerDegreeOfLongitude =
-            MetersPerDegreeOfLatitude * Math.Max(0.01, Math.Cos(Latitude * Math.PI / 180));
+            MetersPerDegreeOfLatitude * double.Max(0.01, double.Cos(Latitude * double.Pi / 180));
 
         return new GeoCoordinate(latitude, Longitude + (east / metersPerDegreeOfLongitude));
     }

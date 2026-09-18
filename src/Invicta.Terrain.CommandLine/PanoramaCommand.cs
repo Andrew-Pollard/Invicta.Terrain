@@ -55,7 +55,7 @@ internal static class PanoramaCommand
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             LayeredTerrain terrain = await CopernicusElevationModel.LoadLayeredAsync(
-                store, location, options.MaximumDistance, options.PixelAngle * Math.PI / 180, cancellationToken);
+                store, location, options.MaximumDistance, options.PixelAngle * double.Pi / 180, cancellationToken);
             Console.WriteLine($"Loaded terrain in {stopwatch.Elapsed.TotalSeconds:F1} s.");
 
             stopwatch.Restart();

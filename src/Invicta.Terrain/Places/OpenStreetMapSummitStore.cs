@@ -81,11 +81,11 @@ public sealed class OpenStreetMapSummitStore
     private static IEnumerable<(int South, int West)> CellsCovering(GeoBoundingBox region)
     {
         int firstSouth = FloorToCell(region.South);
-        int lastSouth = Math.Min(FloorToCell(region.North), 90 - CellSize);
+        int lastSouth = int.Min(FloorToCell(region.North), 90 - CellSize);
         int firstWest = FloorToCell(region.West);
 
         // A region wider than the world would otherwise list some cells twice.
-        int lastWest = Math.Min(FloorToCell(region.East), firstWest + 360 - CellSize);
+        int lastWest = int.Min(FloorToCell(region.East), firstWest + 360 - CellSize);
 
         for (int south = firstSouth; south <= lastSouth; south += CellSize)
         {
@@ -98,7 +98,7 @@ public sealed class OpenStreetMapSummitStore
 
     private static int FloorToCell(double degrees)
     {
-        return (int)Math.Floor(degrees / CellSize) * CellSize;
+        return (int)double.Floor(degrees / CellSize) * CellSize;
     }
 
     private static int NormalizeCellLongitude(int west)

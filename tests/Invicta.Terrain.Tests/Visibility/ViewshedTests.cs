@@ -20,7 +20,7 @@ internal sealed class ViewshedTests
     {
         // From 200 m with standard refraction, the horizon is sqrt(2Rh / (1 - k)), about 54 km.
         const double EyeHeight = 200;
-        double horizon = Math.Sqrt(2 * 6_371_000 * EyeHeight / (1 - Viewpoint.StandardRefractionCoefficient));
+        double horizon = double.Sqrt(2 * 6_371_000 * EyeHeight / (1 - Viewpoint.StandardRefractionCoefficient));
         Viewpoint viewpoint = new(s_origin, EyeHeight);
 
         Viewshed viewshed = Viewshed.Compute(
@@ -76,7 +76,7 @@ internal sealed class ViewshedTests
         {
             double north = (coordinate.Latitude - s_origin.Latitude) * 111_320;
 
-            return Math.Abs(north - distanceNorth) <= 50 ? 100 : 0;
+            return double.Abs(north - distanceNorth) <= 50 ? 100 : 0;
         }
     }
 }

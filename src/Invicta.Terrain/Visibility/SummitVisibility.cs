@@ -59,7 +59,7 @@ public static class SummitVisibility
 
         IElevationModel model = terrain.GetModel(path.Distance);
         double height = model.FindHighestPoint(summit.Coordinate, SummitSearchSpacing, SummitSearchSpacing).Height;
-        double angle = viewpoint.ApparentElevationAngle(summit.Coordinate, height, path.Distance) * 180 / Math.PI;
+        double angle = viewpoint.ApparentElevationAngle(summit.Coordinate, height, path.Distance) * 180 / double.Pi;
         double azimuth = path.InitialAzimuth < 0 ? path.InitialAzimuth + 360 : path.InitialAzimuth;
 
         double x = panorama.ColumnAt(azimuth);
@@ -78,14 +78,14 @@ public static class SummitVisibility
     /// </summary>
     private static bool ShowsTerrainAtDistance(Panorama panorama, VisibleSummit summit)
     {
-        double tolerance = Math.Max(250, 0.02 * summit.Distance);
-        int summitRow = (int)Math.Round(summit.Y);
+        double tolerance = double.Max(250, 0.02 * summit.Distance);
+        int summitRow = (int)double.Round(summit.Y);
 
-        foreach (int x in ColumnsAround(panorama, (int)Math.Round(summit.X)))
+        foreach (int x in ColumnsAround(panorama, (int)double.Round(summit.X)))
         {
-            for (int y = summitRow; y <= Math.Min(summitRow + 2, panorama.Height - 1); y++)
+            for (int y = summitRow; y <= int.Min(summitRow + 2, panorama.Height - 1); y++)
             {
-                if (Math.Abs(panorama.GetDistance(x, y) - summit.Distance) <= tolerance)
+                if (double.Abs(panorama.GetDistance(x, y) - summit.Distance) <= tolerance)
                 {
                     return true;
                 }

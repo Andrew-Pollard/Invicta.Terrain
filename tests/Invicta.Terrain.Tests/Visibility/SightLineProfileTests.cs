@@ -29,7 +29,7 @@ internal sealed class SightLineProfileTests
         {
             // Sea level, lowered by the curvature that refraction does not make up.
             double expected = -(1 - RefractionCoefficient) * point.Distance * point.Distance / (2 * 6_371_000);
-            worstError = Math.Max(worstError, Math.Abs(point.ApparentHeight - expected));
+            worstError = double.Max(worstError, double.Abs(point.ApparentHeight - expected));
         }
 
         using (Assert.EnterMultipleScope())
@@ -79,7 +79,7 @@ internal sealed class SightLineProfileTests
         {
             double distance = Geodesic.Inverse(top, coordinate).Distance;
 
-            return Math.Max(0, 200 * (1 - (distance / 500)));
+            return double.Max(0, 200 * (1 - (distance / 500)));
         }
     }
 }

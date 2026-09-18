@@ -65,10 +65,10 @@ internal sealed class GeodesicTests
             double initialAzimuthError = AngleErrorInRadians(solution.InitialAzimuth, reference.InitialAzimuth);
             double finalAzimuthError = AngleErrorInRadians(solution.FinalAzimuth, reference.FinalAzimuth);
             double azimuthDisplacement =
-                Math.Max(initialAzimuthError, finalAzimuthError) * Math.Abs(reference.ReducedLength);
+                double.Max(initialAzimuthError, finalAzimuthError) * double.Abs(reference.ReducedLength);
 
-            worstDistanceError = Math.Max(worstDistanceError, Math.Abs(solution.Distance - reference.Distance));
-            worstAzimuthDisplacement = Math.Max(worstAzimuthDisplacement, azimuthDisplacement);
+            worstDistanceError = double.Max(worstDistanceError, double.Abs(solution.Distance - reference.Distance));
+            worstAzimuthDisplacement = double.Max(worstAzimuthDisplacement, azimuthDisplacement);
         }
 
         using (Assert.EnterMultipleScope())
@@ -90,8 +90,8 @@ internal sealed class GeodesicTests
             double northError =
                 AngleErrorInRadians(position.Latitude, reference.End.Latitude) * Wgs84.EquatorialRadius;
             double eastError = AngleErrorInRadians(position.Longitude, reference.End.Longitude)
-                * Wgs84.EquatorialRadius * Math.Cos(reference.End.Latitude * Math.PI / 180);
-            worstPositionError = Math.Max(worstPositionError, double.Hypot(northError, eastError));
+                * Wgs84.EquatorialRadius * double.Cos(reference.End.Latitude * double.Pi / 180);
+            worstPositionError = double.Max(worstPositionError, double.Hypot(northError, eastError));
         }
 
         Assert.That(worstPositionError, Is.LessThan(Tolerance));
@@ -99,7 +99,7 @@ internal sealed class GeodesicTests
 
     private static double AngleErrorInRadians(double actual, double expected)
     {
-        return Math.Abs(Math.IEEERemainder(actual - expected, 360)) * Math.PI / 180;
+        return double.Abs(double.Ieee754Remainder(actual - expected, 360)) * double.Pi / 180;
     }
 
     /// <summary>Describes one geodesic from the test set.</summary>

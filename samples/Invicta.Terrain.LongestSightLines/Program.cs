@@ -98,7 +98,7 @@ internal static class Program
     private static void DrawProfiles(
         IElevationModel terrain, List<SightLine> sightLines, string directory, string name, double refraction)
     {
-        for (int i = 0; i < Math.Min(ProfileCount, sightLines.Count); i++)
+        for (int i = 0; i < int.Min(ProfileCount, sightLines.Count); i++)
         {
             SightLine line = sightLines[i];
             Viewpoint viewpoint = new(line.From.Coordinate, line.From.Height + EyeHeight, refraction);
@@ -172,17 +172,17 @@ internal static class Program
     /// <summary>Gets the distance to the horizon over a smooth Earth from a height, with the most refraction.</summary>
     private static double HorizonDistance(double height)
     {
-        return Math.Sqrt(2 * MeanEarthRadius * height / (1 - MaximumRefractionCoefficient));
+        return double.Sqrt(2 * MeanEarthRadius * height / (1 - MaximumRefractionCoefficient));
     }
 
     /// <summary>Gets a quick distance on a sphere, good to about half a percent, to rule out distant pairs.</summary>
     private static double ApproximateDistance(GeoCoordinate first, GeoCoordinate second)
     {
-        double meanLatitude = (first.Latitude + second.Latitude) / 2 * Math.PI / 180;
-        double north = (second.Latitude - first.Latitude) * Math.PI / 180;
-        double east = (second.Longitude - first.Longitude) * Math.PI / 180 * Math.Cos(meanLatitude);
+        double meanLatitude = (first.Latitude + second.Latitude) / 2 * double.Pi / 180;
+        double north = (second.Latitude - first.Latitude) * double.Pi / 180;
+        double east = (second.Longitude - first.Longitude) * double.Pi / 180 * double.Cos(meanLatitude);
 
-        return MeanEarthRadius * Math.Sqrt((north * north) + (east * east));
+        return MeanEarthRadius * double.Sqrt((north * north) + (east * east));
     }
 
     /// <summary>

@@ -54,7 +54,7 @@ internal sealed class PanoramaTests
     public void Render_OverSea_PutsHorizonAtDipAngle(int column)
     {
         // The horizon dips below the horizontal by sqrt(2h / R), to within a pixel.
-        double dip = Math.Sqrt(2 * EyeHeight / EffectiveRadius) * 180 / Math.PI;
+        double dip = double.Sqrt(2 * EyeHeight / EffectiveRadius) * 180 / double.Pi;
 
         int horizonRow = Enumerable.Range(0, _panorama.Height)
             .First(y => !double.IsNaN(_panorama.GetDistance(column, y)));
@@ -69,9 +69,9 @@ internal sealed class PanoramaTests
     {
         // Looking down by a small angle a, the sea falls away with curvature, so the line of sight meets it where
         // a = h / d + d / 2R. The nearer root is d = R (a - sqrt(a^2 - 2h / R)).
-        double depression = -_panorama.ElevationAngleAt(row) * Math.PI / 180;
+        double depression = -_panorama.ElevationAngleAt(row) * double.Pi / 180;
         double discriminant = (depression * depression) - (2 * EyeHeight / EffectiveRadius);
-        double expected = EffectiveRadius * (depression - Math.Sqrt(discriminant));
+        double expected = EffectiveRadius * (depression - double.Sqrt(discriminant));
 
         Assert.That(_panorama.GetDistance(100, row), Is.EqualTo(expected).Within(0.02 * expected));
     }

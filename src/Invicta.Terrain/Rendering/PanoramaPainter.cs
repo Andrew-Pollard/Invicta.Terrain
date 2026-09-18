@@ -66,7 +66,7 @@ public static class PanoramaPainter
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         // Leave out the empty sky above the highest terrain, keeping a margin, so the labels sit close to the summits.
-        int firstRow = Math.Max(0, HighestTerrainRow(panorama) - SkyMargin);
+        int firstRow = int.Max(0, HighestTerrainRow(panorama) - SkyMargin);
         int shownRows = panorama.Height - firstRow;
 
         int height = LabelBandHeight + shownRows + CompassBandHeight + CreditBandHeight;
@@ -144,7 +144,7 @@ public static class PanoramaPainter
 
         if (IsRidgeLine(panorama, x, y, distance))
         {
-            double nearness = Math.Exp(-distance / HazeDistance);
+            double nearness = double.Exp(-distance / HazeDistance);
             return ColorMath.Blend(s_haze, s_ridgeLine, nearness);
         }
 
@@ -152,7 +152,7 @@ public static class PanoramaPainter
         double light = 0.35 + (0.65 * panorama.GetShading(x, y));
         SKColor lit = ColorMath.Shade(ground, light);
 
-        return ColorMath.Blend(s_haze, lit, Math.Exp(-distance / HazeDistance));
+        return ColorMath.Blend(s_haze, lit, double.Exp(-distance / HazeDistance));
     }
 
     /// <summary>
@@ -173,9 +173,9 @@ public static class PanoramaPainter
     /// <summary>Gets the sky's color, fading from the horizon up to the top of the panorama.</summary>
     private static SKColor SkyColor(double elevationAngle, double topAngle)
     {
-        double height = Math.Clamp(elevationAngle / Math.Max(1, topAngle), 0, 1);
+        double height = double.Clamp(elevationAngle / double.Max(1, topAngle), 0, 1);
 
-        return ColorMath.Blend(s_skyHorizon, s_skyTop, Math.Sqrt(height));
+        return ColorMath.Blend(s_skyHorizon, s_skyTop, double.Sqrt(height));
     }
 
     private static SKColor HeightColor(double height)
@@ -191,7 +191,7 @@ public static class PanoramaPainter
             if (height < upperHeight)
             {
                 (double lowerHeight, SKColor lowerColor) = s_heightColors[i - 1];
-                double amount = Math.Max(0, (height - lowerHeight) / (upperHeight - lowerHeight));
+                double amount = double.Max(0, (height - lowerHeight) / (upperHeight - lowerHeight));
 
                 return ColorMath.Blend(lowerColor, upperColor, amount);
             }
@@ -224,7 +224,7 @@ public static class PanoramaPainter
         foreach (VisibleSummit summit in summits.OrderByDescending(Importance))
         {
             float x = (float)summit.X + 0.5f;
-            if (placed.Exists(other => Math.Abs(other - x) < LabelSpacing))
+            if (placed.Exists(other => float.Abs(other - x) < LabelSpacing))
             {
                 continue;
             }
@@ -275,7 +275,7 @@ public static class PanoramaPainter
 
         string[] points = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
         double leftEdge = panorama.AzimuthAt(-0.5);
-        int firstTick = (int)Math.Ceiling(leftEdge / 5) * 5;
+        int firstTick = (int)double.Ceiling(leftEdge / 5) * 5;
         for (int azimuth = firstTick; azimuth < leftEdge + panorama.HorizontalFieldOfView; azimuth += 5)
         {
             float x = (float)panorama.ColumnAt(azimuth) + 0.5f;

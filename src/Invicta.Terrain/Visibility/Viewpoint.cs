@@ -96,7 +96,7 @@ public sealed class Viewpoint
     {
         GeocentricPosition sightLine = GeocentricPosition.FromGeodetic(point, height) - Position;
         double sine = sightLine.Dot(Up) / sightLine.Length;
-        double geometricAngle = Math.Asin(Math.Clamp(sine, -1, 1));
+        double geometricAngle = double.Asin(double.Clamp(sine, -1, 1));
 
         return geometricAngle + (RefractionCoefficient * distance / (2 * MeanEarthRadius));
     }

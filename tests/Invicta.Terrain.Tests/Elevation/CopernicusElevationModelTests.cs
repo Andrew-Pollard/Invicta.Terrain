@@ -69,7 +69,7 @@ internal sealed class CopernicusElevationModelTests
             GeoCoordinate sample = OverviewSample(56, -6, level, row, column);
 
             double difference = _models[level].GetElevation(sample) - _models[level - 1].GetElevation(sample);
-            worstDifference = Math.Max(worstDifference, Math.Abs(difference));
+            worstDifference = double.Max(worstDifference, double.Abs(difference));
         }
 
         Assert.That(worstDifference, Is.LessThan(0.01));

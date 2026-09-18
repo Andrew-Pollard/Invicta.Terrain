@@ -82,13 +82,13 @@ internal sealed class ViewpointTests
     /// <summary>Gets the ellipsoid's radius of curvature in a direction, from Euler's theorem.</summary>
     private static double RadiusOfCurvature(double latitude, double azimuth)
     {
-        double sinLatitude = Math.Sin(latitude * Math.PI / 180);
+        double sinLatitude = double.Sin(latitude * double.Pi / 180);
         double w2 = 1 - (EccentricitySquared * sinLatitude * sinLatitude);
-        double meridian = Wgs84.EquatorialRadius * (1 - EccentricitySquared) / (w2 * Math.Sqrt(w2));
-        double primeVertical = Wgs84.EquatorialRadius / Math.Sqrt(w2);
+        double meridian = Wgs84.EquatorialRadius * (1 - EccentricitySquared) / (w2 * double.Sqrt(w2));
+        double primeVertical = Wgs84.EquatorialRadius / double.Sqrt(w2);
 
-        double sinAzimuth = Math.Sin(azimuth * Math.PI / 180);
-        double cosAzimuth = Math.Cos(azimuth * Math.PI / 180);
+        double sinAzimuth = double.Sin(azimuth * double.Pi / 180);
+        double cosAzimuth = double.Cos(azimuth * double.Pi / 180);
 
         return meridian * primeVertical
             / ((meridian * sinAzimuth * sinAzimuth) + (primeVertical * cosAzimuth * cosAzimuth));
@@ -98,9 +98,9 @@ internal sealed class ViewpointTests
     private static double SphereElevationAngle(double radius, double eyeHeight, double targetHeight, double distance)
     {
         double centralAngle = distance / radius;
-        double across = (radius + targetHeight) * Math.Sin(centralAngle);
-        double up = ((radius + targetHeight) * Math.Cos(centralAngle)) - (radius + eyeHeight);
+        double across = (radius + targetHeight) * double.Sin(centralAngle);
+        double up = ((radius + targetHeight) * double.Cos(centralAngle)) - (radius + eyeHeight);
 
-        return Math.Atan2(up, across);
+        return double.Atan2(up, across);
     }
 }

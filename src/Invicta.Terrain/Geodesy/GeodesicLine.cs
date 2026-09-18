@@ -56,7 +56,7 @@ public sealed class GeodesicLine
         Geodesic.Normalize(ref _ssig1, ref _csig1);
 
         double k2 = _calp0 * _calp0 * Geodesic.Ep2;
-        double eps = k2 / ((2 * (1 + Math.Sqrt(1 + k2))) + k2);
+        double eps = k2 / ((2 * (1 + double.Sqrt(1 + k2))) + k2);
 
         Span<double> c1a = stackalloc double[Geodesic.SeriesOrder + 1];
         _a1m1 = Geodesic.A1Minus1(eps);
@@ -64,8 +64,8 @@ public sealed class GeodesicLine
         _b11 = Geodesic.SinCosSeries(true, _ssig1, _csig1, c1a, Geodesic.SeriesOrder);
 
         // tau1 = sig1 + B11.
-        double s = Math.Sin(_b11);
-        double c = Math.Cos(_b11);
+        double s = double.Sin(_b11);
+        double c = double.Cos(_b11);
         _stau1 = (_ssig1 * c) + (_csig1 * s);
         _ctau1 = (_csig1 * c) - (_ssig1 * s);
 
@@ -86,13 +86,13 @@ public sealed class GeodesicLine
 
         // tau2 = tau1 + tau12, and sig12 follows from reverting the distance series.
         double tau12 = distance / (Geodesic.PolarRadius * (1 + _a1m1));
-        double s = Math.Sin(tau12);
-        double c = Math.Cos(tau12);
+        double s = double.Sin(tau12);
+        double c = double.Cos(tau12);
         double b12 = -Geodesic.SinCosSeries(
             true, (_stau1 * c) + (_ctau1 * s), (_ctau1 * c) - (_stau1 * s), _c1pa, Geodesic.SeriesOrder);
         double sig12 = tau12 - (b12 - _b11);
-        double ssig12 = Math.Sin(sig12);
-        double csig12 = Math.Cos(sig12);
+        double ssig12 = double.Sin(sig12);
+        double csig12 = double.Cos(sig12);
 
         // sig2 = sig1 + sig12.
         double ssig2 = (_ssig1 * csig12) + (_csig1 * ssig12);
@@ -110,7 +110,7 @@ public sealed class GeodesicLine
         // tan(omg2) = sin(alp0) tan(sig2), and omg12 = omg2 - omg1.
         double somg2 = _salp0 * ssig2;
         double comg2 = csig2;
-        double omg12 = Math.Atan2((somg2 * _comg1) - (comg2 * _somg1), (comg2 * _comg1) + (somg2 * _somg1));
+        double omg12 = double.Atan2((somg2 * _comg1) - (comg2 * _somg1), (comg2 * _comg1) + (somg2 * _somg1));
 
         double b32 = Geodesic.SinCosSeries(true, ssig2, csig2, _c3a, Geodesic.SeriesOrder - 1);
         double lam12 = omg12 + (_a3c * (sig12 + (b32 - _b31)));

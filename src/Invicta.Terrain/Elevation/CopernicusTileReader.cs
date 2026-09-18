@@ -83,8 +83,8 @@ internal static class CopernicusTileReader
         int rows,
         int columns)
     {
-        int width = Math.Min(blockWidth, columns - blockLeft);
-        int height = Math.Min(block.Length / blockWidth, rows - blockTop);
+        int width = int.Min(blockWidth, columns - blockLeft);
+        int height = int.Min(block.Length / blockWidth, rows - blockTop);
         for (int row = 0; row < height; row++)
         {
             block.Slice(row * blockWidth, width).CopyTo(heights.Slice(((blockTop + row) * columns) + blockLeft, width));

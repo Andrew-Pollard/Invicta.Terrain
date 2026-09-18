@@ -68,7 +68,7 @@ public static class ProfilePainter
 
         using SKPaint terrain = new() { Color = s_terrain, IsAntialias = true };
         IEnumerable<(double, double)> surface = profile.Points
-            .Select(point => (point.Distance, Math.Max(point.ApparentHeight, point.SeaLevelApparentHeight)));
+            .Select(point => (point.Distance, double.Max(point.ApparentHeight, point.SeaLevelApparentHeight)));
         using SKPath terrainPath = FilledBelow(surface, scale);
         canvas.DrawPath(terrainPath, terrain);
 
@@ -88,7 +88,7 @@ public static class ProfilePainter
 
         if (!result.IsVisible && result.Obstruction is { } obstruction)
         {
-            double apparentHeight = profile.EyeHeight + (obstruction.Distance * Math.Tan(obstruction.ElevationAngle));
+            double apparentHeight = profile.EyeHeight + (obstruction.Distance * double.Tan(obstruction.ElevationAngle));
             canvas.DrawCircle(scale.X(obstruction.Distance), scale.Y(apparentHeight), 6, line);
         }
 
@@ -105,7 +105,7 @@ public static class ProfilePainter
         using SKPaint sea = new() { Color = s_sea, StrokeWidth = columnWidth };
         foreach (ProfilePoint point in points)
         {
-            if (Math.Abs(point.TerrainHeight) <= SeaLevelTolerance)
+            if (double.Abs(point.TerrainHeight) <= SeaLevelTolerance)
             {
                 float x = scale.X(point.Distance);
                 canvas.DrawLine(x, scale.Y(point.SeaLevelApparentHeight), x, Height - BottomMargin, sea);
@@ -143,7 +143,7 @@ public static class ProfilePainter
         }
 
         double heightStep = NiceStep((scale.Top - scale.Bottom) / 6);
-        double firstHeight = Math.Ceiling(scale.Bottom / heightStep) * heightStep;
+        double firstHeight = double.Ceiling(scale.Bottom / heightStep) * heightStep;
         for (double height = firstHeight; height <= scale.Top; height += heightStep)
         {
             float y = scale.Y(height);
@@ -163,7 +163,7 @@ public static class ProfilePainter
     /// <summary>Rounds a rough step up to 1, 2 or 5 times a power of ten.</summary>
     private static double NiceStep(double rough)
     {
-        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(rough)));
+        double magnitude = double.Pow(10, double.Floor(double.Log10(rough)));
         double normalized = rough / magnitude;
 
         return magnitude * normalized switch
@@ -183,7 +183,7 @@ public static class ProfilePainter
         LineOfSightResult result = profile.Result;
 
         // A visible target on a summit only just clears its own near slope, so how far it clears says little.
-        double shortfallSeconds = -result.Clearance * 180 / Math.PI * 3600;
+        double shortfallSeconds = -result.Clearance * 180 / double.Pi * 3600;
         string verdict = result.IsVisible
             ? "visible"
             : Format($"hidden {result.Obstruction?.Distance / 1000:0.0} km out, by {shortfallSeconds:0.0}″");
@@ -209,12 +209,12 @@ public static class ProfilePainter
         /// <summary>Creates a scale that fits the whole profile, with a margin above and below.</summary>
         public static Scale Fit(SightLineProfile profile)
         {
-            double top = Math.Max(profile.EyeHeight, profile.TargetApparentHeight);
-            double bottom = Math.Min(profile.EyeHeight, profile.TargetApparentHeight);
+            double top = double.Max(profile.EyeHeight, profile.TargetApparentHeight);
+            double bottom = double.Min(profile.EyeHeight, profile.TargetApparentHeight);
             foreach (ProfilePoint point in profile.Points)
             {
-                top = Math.Max(top, point.ApparentHeight);
-                bottom = Math.Min(bottom, point.SeaLevelApparentHeight);
+                top = double.Max(top, point.ApparentHeight);
+                bottom = double.Min(bottom, point.SeaLevelApparentHeight);
             }
 
             double margin = (top - bottom) * 0.08;

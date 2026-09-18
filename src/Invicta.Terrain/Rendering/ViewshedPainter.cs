@@ -42,7 +42,7 @@ public static class ViewshedPainter
 
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        int size = (int)Math.Ceiling(2 * viewshed.Radius / viewshed.Resolution);
+        int size = (int)double.Ceiling(2 * viewshed.Radius / viewshed.Resolution);
         float[] heights = SampleHeights(viewshed, terrain, size);
 
         SKColor[] colors = new SKColor[size * size];
@@ -98,7 +98,7 @@ public static class ViewshedPainter
         double east = (x + 0.5 - (size / 2.0)) * viewshed.Resolution;
         double north = ((size / 2.0) - y - 0.5) * viewshed.Resolution;
 
-        return (Math.Sqrt((east * east) + (north * north)), Math.Atan2(east, north) * 180 / Math.PI);
+        return (double.Sqrt((east * east) + (north * north)), double.Atan2(east, north) * 180 / double.Pi);
     }
 
     private static SKColor PixelColor(Viewshed viewshed, float[] heights, int size, int x, int y)
@@ -109,7 +109,7 @@ public static class ViewshedPainter
             return s_outside;
         }
 
-        SKColor ground = height <= 0 ? s_sea : ColorMath.Blend(s_lowland, s_upland, Math.Clamp(height / 1000, 0, 1));
+        SKColor ground = height <= 0 ? s_sea : ColorMath.Blend(s_lowland, s_upland, float.Clamp(height / 1000, 0, 1));
         double light = Hillshade(heights, size, x, y, viewshed.Resolution);
         SKColor shaded = ColorMath.Shade(ground, light);
 
@@ -145,10 +145,10 @@ public static class ViewshedPainter
     {
         using SKPaint ink = new() { Color = s_ink, StrokeWidth = 2, IsAntialias = true, Style = SKPaintStyle.Stroke };
         using SKPaint text = new() { Color = s_ink, IsAntialias = true };
-        using SKFont font = new(SKTypeface.Default, Math.Max(14, size / 80f));
+        using SKFont font = new(SKTypeface.Default, float.Max(14, size / 80f));
 
         float center = size / 2f;
-        canvas.DrawCircle(center, center, Math.Max(6, size / 200f), ink);
+        canvas.DrawCircle(center, center, float.Max(6, size / 200f), ink);
 
         double barMeters = NiceKilometers(viewshed.Radius / 4) * 1000;
         float barPixels = (float)(barMeters / viewshed.Resolution);
@@ -170,7 +170,7 @@ public static class ViewshedPainter
     private static double NiceKilometers(double meters)
     {
         double kilometers = meters / 1000;
-        double magnitude = Math.Pow(10, Math.Floor(Math.Log10(kilometers)));
+        double magnitude = double.Pow(10, double.Floor(double.Log10(kilometers)));
         double normalized = kilometers / magnitude;
 
         return magnitude * normalized switch

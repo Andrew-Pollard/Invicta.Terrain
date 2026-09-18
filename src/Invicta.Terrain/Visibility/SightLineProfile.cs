@@ -65,7 +65,7 @@ public sealed class SightLineProfile
         for (int i = 0; i < pointCount; i++)
         {
             // Start just past the eye, where the ray has a direction.
-            double distance = Math.Max(1, result.Distance * i / (pointCount - 1));
+            double distance = double.Max(1, result.Distance * i / (pointCount - 1));
             TerrainSample sample = ray.Sample(distance);
             double seaLevelAngle = viewpoint.ApparentElevationAngle(sample.Coordinate, 0, distance);
 
@@ -83,6 +83,6 @@ public sealed class SightLineProfile
 
     private static double ApparentHeight(Viewpoint viewpoint, double distance, double elevationAngle)
     {
-        return viewpoint.Height + (distance * Math.Tan(elevationAngle));
+        return viewpoint.Height + (distance * double.Tan(elevationAngle));
     }
 }

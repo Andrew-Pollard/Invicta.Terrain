@@ -23,19 +23,19 @@ internal sealed class GeoBoundingBoxTests
         for (int i = 0; i < 36_000; i++)
         {
             GeoCoordinate point = new GeodesicLine(center, i / 100.0).GetPosition(radius);
-            double unwrappedLongitude = longitude + Math.IEEERemainder(point.Longitude - longitude, 360);
+            double unwrappedLongitude = longitude + double.Ieee754Remainder(point.Longitude - longitude, 360);
 
-            south = Math.Min(south, point.Latitude);
-            north = Math.Max(north, point.Latitude);
-            west = Math.Min(west, unwrappedLongitude);
-            east = Math.Max(east, unwrappedLongitude);
+            south = double.Min(south, point.Latitude);
+            north = double.Max(north, point.Latitude);
+            west = double.Min(west, unwrappedLongitude);
+            east = double.Max(east, unwrappedLongitude);
         }
 
         // Sampling the circle every quarter degree can miss its extent by r(1 - cos 1/8°).
-        double sampling = radius * (1 - Math.Cos(0.125 * Math.PI / 180));
+        double sampling = radius * (1 - double.Cos(0.125 * double.Pi / 180));
         double latitudeTolerance = sampling / 110_000;
-        double widestLatitude = Math.Max(Math.Abs(box.North), Math.Abs(box.South)) * Math.PI / 180;
-        double longitudeTolerance = latitudeTolerance / Math.Cos(widestLatitude);
+        double widestLatitude = double.Max(double.Abs(box.North), double.Abs(box.South)) * double.Pi / 180;
+        double longitudeTolerance = latitudeTolerance / double.Cos(widestLatitude);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(box.South, Is.EqualTo(south).Within(latitudeTolerance));
@@ -65,20 +65,20 @@ internal sealed class GeoBoundingBoxTests
         double north = -90;
         double west = double.PositiveInfinity;
         double east = double.NegativeInfinity;
-        int samples = (int)Math.Ceiling(path.Distance / 100);
+        int samples = (int)double.Ceiling(path.Distance / 100);
         for (int i = 0; i <= samples; i++)
         {
             GeoCoordinate point = line.GetPosition(path.Distance * i / samples);
-            double unwrappedLongitude = startLongitude + Math.IEEERemainder(point.Longitude - startLongitude, 360);
+            double unwrappedLongitude = startLongitude + double.Ieee754Remainder(point.Longitude - startLongitude, 360);
 
-            south = Math.Min(south, point.Latitude);
-            north = Math.Max(north, point.Latitude);
-            west = Math.Min(west, unwrappedLongitude);
-            east = Math.Max(east, unwrappedLongitude);
+            south = double.Min(south, point.Latitude);
+            north = double.Max(north, point.Latitude);
+            west = double.Min(west, unwrappedLongitude);
+            east = double.Max(east, unwrappedLongitude);
         }
 
-        double widestLatitude = Math.Max(Math.Abs(box.North), Math.Abs(box.South)) * Math.PI / 180;
-        double longitudeTolerance = LatitudeTolerance / Math.Cos(widestLatitude);
+        double widestLatitude = double.Max(double.Abs(box.North), double.Abs(box.South)) * double.Pi / 180;
+        double longitudeTolerance = LatitudeTolerance / double.Cos(widestLatitude);
         using (Assert.EnterMultipleScope())
         {
             Assert.That(box.South, Is.EqualTo(south).Within(LatitudeTolerance));

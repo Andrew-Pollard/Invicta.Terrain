@@ -60,7 +60,7 @@ internal sealed class SummitVisibilityTests
         // Rising 398 m over 20 km, less the Earth's curvature d / 2R, of which refraction gives back the fraction k.
         VisibleSummit aside = _visible["Aside"];
         double curvature = (1 - Viewpoint.StandardRefractionCoefficient) * 20_000 / (2 * 6_371_000);
-        double expectedAngle = (Math.Atan2(398, 20_000) - curvature) * 180 / Math.PI;
+        double expectedAngle = (double.Atan2(398, 20_000) - curvature) * 180 / double.Pi;
 
         using (Assert.EnterMultipleScope())
         {
@@ -121,7 +121,7 @@ internal sealed class SummitVisibilityTests
             foreach (Cone cone in cones)
             {
                 double distance = Geodesic.Inverse(cone.Peak, coordinate).Distance;
-                height = Math.Max(height, cone.Height * (1 - (distance / cone.Radius)));
+                height = double.Max(height, cone.Height * (1 - (distance / cone.Radius)));
             }
 
             return height;

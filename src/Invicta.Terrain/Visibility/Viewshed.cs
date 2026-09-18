@@ -73,7 +73,7 @@ public sealed class Viewshed
         ArgumentOutOfRangeException.ThrowIfNegative(targetHeight);
 
         // Neighboring rays are one resolution apart at the edge.
-        int rayCount = (int)Math.Ceiling(2 * Math.PI * radius / resolution);
+        int rayCount = (int)double.Ceiling(2 * double.Pi * radius / resolution);
         Viewshed viewshed = new(viewpoint, radius, resolution, rayCount);
 
         ParallelOptions options = new() { CancellationToken = cancellationToken };
@@ -96,13 +96,13 @@ public sealed class Viewshed
             return false;
         }
 
-        int sample = (int)Math.Round(distance / _sampleSpacing) - 1;
+        int sample = (int)double.Round(distance / _sampleSpacing) - 1;
         if (sample < 0)
         {
             return true;
         }
 
-        int ray = (int)Math.Round(azimuth / _azimuthStep);
+        int ray = (int)double.Round(azimuth / _azimuthStep);
         ray = ((ray % _rays.Length) + _rays.Length) % _rays.Length;
 
         BitArray samples = _rays[ray];
@@ -113,7 +113,7 @@ public sealed class Viewshed
     private void ComputeRay(LayeredTerrain terrain, int rayIndex, double targetHeight)
     {
         TerrainRay ray = new(Viewpoint, terrain, rayIndex * _azimuthStep);
-        int sampleCount = (int)Math.Floor(Radius / _sampleSpacing);
+        int sampleCount = (int)double.Floor(Radius / _sampleSpacing);
         BitArray visible = new(sampleCount);
 
         double highestAngle = double.NegativeInfinity;
@@ -127,7 +127,7 @@ public sealed class Viewshed
                 ? sample.ElevationAngle
                 : Viewpoint.ApparentElevationAngle(sample.Coordinate, sample.Height + targetHeight, distance);
             visible[i] = targetAngle >= highestAngle;
-            highestAngle = Math.Max(highestAngle, sample.ElevationAngle);
+            highestAngle = double.Max(highestAngle, sample.ElevationAngle);
         }
 
         _rays[rayIndex] = visible;

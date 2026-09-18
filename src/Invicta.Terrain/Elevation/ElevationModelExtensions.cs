@@ -29,7 +29,7 @@ public static class ElevationModelExtensions
 
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(spacing);
 
-        int steps = (int)Math.Floor(halfWidth / spacing);
+        int steps = (int)double.Floor(halfWidth / spacing);
         GeoCoordinate highest = center;
         double highestHeight = model.GetElevation(center);
         for (int north = -steps; north <= steps; north++)

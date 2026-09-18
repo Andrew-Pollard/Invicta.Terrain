@@ -57,7 +57,7 @@ internal sealed class RoutePath
             leg = ~leg - 1;
         }
 
-        leg = Math.Clamp(leg, 0, _legs.Length - 1);
+        leg = int.Clamp(leg, 0, _legs.Length - 1);
 
         return _legs[leg].GetPosition(along - _legStarts[leg]);
     }

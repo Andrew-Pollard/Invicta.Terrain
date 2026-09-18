@@ -31,7 +31,7 @@ internal sealed class LineOfSightTerrainTests
     {
         // Samples fall at different points in each direction, so lines that only just clear or only just miss the
         // terrain may disagree. Anything clearing or missing by more than 0.01° must agree.
-        const double Margin = 0.01 * Math.PI / 180;
+        const double Margin = 0.01 * double.Pi / 180;
 
         Random random = new(57);
         int visible = 0;
@@ -45,7 +45,7 @@ internal sealed class LineOfSightTerrainTests
 
             LineOfSightResult forward = TraceBetween(first, second);
             LineOfSightResult backward = TraceBetween(second, first);
-            if (Math.Abs(forward.Clearance) > Margin && Math.Abs(backward.Clearance) > Margin)
+            if (double.Abs(forward.Clearance) > Margin && double.Abs(backward.Clearance) > Margin)
             {
                 visible += forward.IsVisible ? 1 : 0;
                 hidden += forward.IsVisible ? 0 : 1;

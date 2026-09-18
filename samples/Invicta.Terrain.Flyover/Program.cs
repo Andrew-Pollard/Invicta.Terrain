@@ -104,7 +104,7 @@ internal static class Program
 
         CopernicusTileStore tileStore = new(Path.Combine(cacheDirectory, "copernicus"), httpClient);
         LayeredTerrain terrain = await CopernicusElevationModel.LoadLayeredAsync(
-            tileStore, middle, radius, PixelAngle * Math.PI / 180, CancellationToken.None);
+            tileStore, middle, radius, PixelAngle * double.Pi / 180, CancellationToken.None);
         Report(stopwatch, $"Loaded the terrain along {path.Distance / 1000:F1} km of route.");
 
         OpenStreetMapSummitStore summitStore = new(Path.Combine(cacheDirectory, "openstreetmap"), httpClient);
@@ -166,7 +166,7 @@ internal static class Program
         double flightDistance = path.Distance - route.StopShortOf;
 
         // Two frames are the fewest that can be spaced along the flight, however short it is.
-        int frameCount = Math.Max(2, (int)Math.Round(flightDistance / route.Speed * FrameRate));
+        int frameCount = int.Max(2, (int)double.Round(flightDistance / route.Speed * FrameRate));
 
         GeoCoordinate[] positions = new GeoCoordinate[frameCount];
         double[] headings = new double[frameCount];
@@ -195,7 +195,7 @@ internal static class Program
         double highest = double.NegativeInfinity;
         for (double ahead = 0; ahead <= lookAhead; ahead += LookAheadSpacing)
         {
-            highest = Math.Max(highest, model.GetElevation(path.GetPosition(along + ahead)));
+            highest = double.Max(highest, model.GetElevation(path.GetPosition(along + ahead)));
         }
 
         return highest;
@@ -211,7 +211,7 @@ internal static class Program
         unwound[0] = azimuths[0];
         for (int i = 1; i < azimuths.Length; i++)
         {
-            unwound[i] = unwound[i - 1] + Math.IEEERemainder(azimuths[i] - unwound[i - 1], 360);
+            unwound[i] = unwound[i - 1] + double.Ieee754Remainder(azimuths[i] - unwound[i - 1], 360);
         }
 
         return unwound;
@@ -223,8 +223,8 @@ internal static class Program
         double[] smoothed = new double[values.Length];
         for (int i = 0; i < values.Length; i++)
         {
-            int first = Math.Max(0, i - SmoothingFrames);
-            int last = Math.Min(values.Length - 1, i + SmoothingFrames);
+            int first = int.Max(0, i - SmoothingFrames);
+            int last = int.Min(values.Length - 1, i + SmoothingFrames);
 
             double total = 0;
             for (int j = first; j <= last; j++)

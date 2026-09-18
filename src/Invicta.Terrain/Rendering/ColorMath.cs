@@ -25,11 +25,11 @@ internal static class ColorMath
 
     private static byte Mix(byte first, byte second, double amount)
     {
-        return (byte)Math.Round(first + ((second - first) * amount));
+        return (byte)double.Round(first + ((second - first) * amount));
     }
 
     private static byte Scale(byte channel, double factor)
     {
-        return (byte)Math.Clamp(Math.Round(channel * factor), 0, 255);
+        return (byte)double.Clamp(double.Round(channel * factor), 0, 255);
     }
 }

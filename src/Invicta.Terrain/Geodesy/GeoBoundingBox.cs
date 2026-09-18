@@ -81,12 +81,12 @@ public readonly record struct GeoBoundingBox
         {
             GeodesicLine line = new(center, 360.0 * i / AroundAzimuthCount);
             GeoCoordinate point = line.GetPosition(radius);
-            double longitudeOffset = Math.IEEERemainder(point.Longitude - center.Longitude, 360);
+            double longitudeOffset = double.Ieee754Remainder(point.Longitude - center.Longitude, 360);
 
-            south = Math.Min(south, point.Latitude);
-            north = Math.Max(north, point.Latitude);
-            westOffset = Math.Min(westOffset, longitudeOffset);
-            eastOffset = Math.Max(eastOffset, longitudeOffset);
+            south = double.Min(south, point.Latitude);
+            north = double.Max(north, point.Latitude);
+            westOffset = double.Min(westOffset, longitudeOffset);
+            eastOffset = double.Max(eastOffset, longitudeOffset);
         }
 
         return new GeoBoundingBox(south, center.Longitude + westOffset, north, center.Longitude + eastOffset);
@@ -107,21 +107,21 @@ public readonly record struct GeoBoundingBox
 
         GeodesicSolution path = Geodesic.Inverse(start, end);
         GeodesicLine line = new(start, path.InitialAzimuth);
-        int intervals = Math.Max(1, (int)Math.Ceiling(path.Distance / SampleSpacing));
+        int intervals = int.Max(1, (int)double.Ceiling(path.Distance / SampleSpacing));
 
-        double south = Math.Min(start.Latitude, end.Latitude);
-        double north = Math.Max(start.Latitude, end.Latitude);
-        double westOffset = Math.Min(0, Math.IEEERemainder(end.Longitude - start.Longitude, 360));
-        double eastOffset = Math.Max(0, Math.IEEERemainder(end.Longitude - start.Longitude, 360));
+        double south = double.Min(start.Latitude, end.Latitude);
+        double north = double.Max(start.Latitude, end.Latitude);
+        double westOffset = double.Min(0, double.Ieee754Remainder(end.Longitude - start.Longitude, 360));
+        double eastOffset = double.Max(0, double.Ieee754Remainder(end.Longitude - start.Longitude, 360));
         for (int i = 1; i < intervals; i++)
         {
             GeoCoordinate point = line.GetPosition(path.Distance * i / intervals);
-            double longitudeOffset = Math.IEEERemainder(point.Longitude - start.Longitude, 360);
+            double longitudeOffset = double.Ieee754Remainder(point.Longitude - start.Longitude, 360);
 
-            south = Math.Min(south, point.Latitude);
-            north = Math.Max(north, point.Latitude);
-            westOffset = Math.Min(westOffset, longitudeOffset);
-            eastOffset = Math.Max(eastOffset, longitudeOffset);
+            south = double.Min(south, point.Latitude);
+            north = double.Max(north, point.Latitude);
+            westOffset = double.Min(westOffset, longitudeOffset);
+            eastOffset = double.Max(eastOffset, longitudeOffset);
         }
 
         return new GeoBoundingBox(south, start.Longitude + westOffset, north, start.Longitude + eastOffset);

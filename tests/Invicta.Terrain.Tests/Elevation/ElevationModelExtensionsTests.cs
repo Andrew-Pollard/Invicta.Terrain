@@ -41,7 +41,7 @@ internal sealed class ElevationModelExtensionsTests
         /// <inheritdoc/>
         public double GetElevation(GeoCoordinate coordinate)
         {
-            return 1000 - (Math.Abs(coordinate.Longitude - ridgeLongitude) * 1e6);
+            return 1000 - (double.Abs(coordinate.Longitude - ridgeLongitude) * 1e6);
         }
     }
 }

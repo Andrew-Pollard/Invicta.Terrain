@@ -32,7 +32,7 @@ public sealed class Panorama
         LeftEdgeAzimuth = options.LeftEdgeAzimuth;
         PixelAngle = options.PixelAngle;
         TopAngle = options.TopAngle;
-        Height = (int)Math.Ceiling((options.TopAngle - options.BottomAngle) / PixelAngle);
+        Height = (int)double.Ceiling((options.TopAngle - options.BottomAngle) / PixelAngle);
         MaximumDistance = options.MaximumDistance;
 
         _distances = new float[Width * Height];
@@ -120,8 +120,8 @@ public sealed class Panorama
     /// </summary>
     private void RenderColumn(LayeredTerrain terrain, int x)
     {
-        double pixelRadians = PixelAngle * Math.PI / 180;
-        double topRadians = TopAngle * Math.PI / 180;
+        double pixelRadians = PixelAngle * double.Pi / 180;
+        double topRadians = TopAngle * double.Pi / 180;
         TerrainRay ray = new(Viewpoint, terrain, AzimuthAt(x));
 
         // Rows from firstFilledRow down are filled. Pixel y shows terrain once the terrain's apparent angle reaches its
@@ -133,11 +133,11 @@ public sealed class Panorama
         for (double distance = MinimumStep; distance <= MaximumDistance; distance += step)
         {
             // Step further as the terrain recedes, so that each step spans about a pixel.
-            step = Math.Max(MinimumStep, distance * pixelRadians);
+            step = double.Max(MinimumStep, distance * pixelRadians);
 
             TerrainSample sample = ray.Sample(distance);
             double row = ((topRadians - sample.ElevationAngle) / pixelRadians) - 0.5;
-            int newFirstFilledRow = Math.Max(0, (int)Math.Ceiling(row));
+            int newFirstFilledRow = int.Max(0, (int)double.Ceiling(row));
             if (newFirstFilledRow < firstFilledRow)
             {
                 float shading = (float)Shade(terrain.GetModel(distance), sample, step);
@@ -145,7 +145,7 @@ public sealed class Panorama
                 {
                     // Interpolate the distance between this sample and the previous one by row, so that slopes rising
                     // into view get smoothly varying distances rather than steps.
-                    double fraction = previousRow > row ? Math.Clamp((y - row) / (previousRow - row), 0, 1) : 0;
+                    double fraction = previousRow > row ? double.Clamp((y - row) / (previousRow - row), 0, 1) : 0;
                     int index = Index(x, y);
                     _distances[index] = (float)(distance + (fraction * (previousDistance - distance)));
                     _heights[index] = (float)sample.Height;
@@ -195,7 +195,7 @@ public sealed class Panorama
     /// </returns>
     public double ColumnAt(double azimuth)
     {
-        double fromLeftEdge = Math.IEEERemainder(azimuth - LeftEdgeAzimuth, 360);
+        double fromLeftEdge = double.Ieee754Remainder(azimuth - LeftEdgeAzimuth, 360);
         if (fromLeftEdge < 0)
         {
             fromLeftEdge += 360;

@@ -83,13 +83,13 @@ public sealed class CopernicusElevationModel : IElevationModel
 
     private static IEnumerable<(int Latitude, int Longitude)> TilesCovering(GeoBoundingBox region)
     {
-        int south = Math.Max(-90, (int)Math.Floor(region.South - LoadMargin));
-        int north = Math.Min(89, (int)Math.Floor(region.North + LoadMargin));
-        int west = (int)Math.Floor(region.West - LoadMargin);
-        int east = (int)Math.Floor(region.East + LoadMargin);
+        int south = int.Max(-90, (int)double.Floor(region.South - LoadMargin));
+        int north = int.Min(89, (int)double.Floor(region.North + LoadMargin));
+        int west = (int)double.Floor(region.West - LoadMargin);
+        int east = (int)double.Floor(region.East + LoadMargin);
 
         // A region wider than the world would otherwise list some tiles twice.
-        east = Math.Min(east, west + TileSlotsPerLatitude - 1);
+        east = int.Min(east, west + TileSlotsPerLatitude - 1);
 
         for (int latitude = south; latitude <= north; latitude++)
         {
@@ -146,7 +146,7 @@ public sealed class CopernicusElevationModel : IElevationModel
             double nextLevelSpacing = FullResolutionSpacing * (2 << level);
             double reach = level == CopernicusGrid.OverviewLevelCount
                 ? radius
-                : Math.Min(radius, nextLevelSpacing / angularResolution);
+                : double.Min(radius, nextLevelSpacing / angularResolution);
 
             GeoBoundingBox region = GeoBoundingBox.Around(center, reach);
             CopernicusElevationModel model =
@@ -167,7 +167,7 @@ public sealed class CopernicusElevationModel : IElevationModel
     {
         // Rows lie at whole multiples of the row spacing, less the offset, counting north from the equator.
         double rowPosition = (coordinate.Latitude + _rowOffset) * _rowsPerDegree;
-        double southRow = Math.Floor(rowPosition);
+        double southRow = double.Floor(rowPosition);
         double northWeight = rowPosition - southRow;
 
         double south = InterpolateAlongRow((long)southRow, coordinate.Longitude);
@@ -191,7 +191,7 @@ public sealed class CopernicusElevationModel : IElevationModel
         double columnOffset = CopernicusGrid.SampleOffset(fullResolutionSpacing, _overviewLevel);
 
         double columnPosition = (longitude - columnOffset) * columnsPerDegree;
-        double westColumn = Math.Floor(columnPosition);
+        double westColumn = double.Floor(columnPosition);
         double eastWeight = columnPosition - westColumn;
 
         double west = GetSample((int)tileLatitude, rowInTile, (long)westColumn, columnsPerDegree);
@@ -202,7 +202,7 @@ public sealed class CopernicusElevationModel : IElevationModel
 
     private float GetSample(int tileLatitude, int rowInTile, long column, int columnsPerDegree)
     {
-        long tileLongitude = Math.DivRem(column, columnsPerDegree, out long columnInTile);
+        (long tileLongitude, long columnInTile) = long.DivRem(column, columnsPerDegree);
         if (columnInTile < 0)
         {
             tileLongitude--;
@@ -227,7 +227,7 @@ public sealed class CopernicusElevationModel : IElevationModel
 
     private static long CeilingDivide(long dividend, long divisor)
     {
-        long quotient = Math.DivRem(dividend, divisor, out long remainder);
+        (long quotient, long remainder) = long.DivRem(dividend, divisor);
 
         return remainder > 0 ? quotient + 1 : quotient;
     }

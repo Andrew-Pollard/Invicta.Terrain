@@ -61,6 +61,6 @@ internal static class CopernicusGrid
 
         return string.Create(
             CultureInfo.InvariantCulture,
-            $"Copernicus_DSM_COG_10_{hemisphere}{Math.Abs(latitude):00}_00_{side}{Math.Abs(longitude):000}_00_DEM");
+            $"Copernicus_DSM_COG_10_{hemisphere}{double.Abs(latitude):00}_00_{side}{double.Abs(longitude):000}_00_DEM");
     }
 }

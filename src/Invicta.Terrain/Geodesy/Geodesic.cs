@@ -20,7 +20,7 @@ public static class Geodesic
     internal const int SeriesOrder = 6;
 
     /// <summary>The number of radians in one degree.</summary>
-    internal const double Degree = Math.PI / 180;
+    internal const double Degree = double.Pi / 180;
 
     internal const double Flattening = Wgs84.Flattening;
     internal const double PolarRadius = Wgs84.EquatorialRadius * (1 - Flattening);
@@ -59,7 +59,7 @@ public static class Geodesic
 
     // The central angle below which a geodesic counts as really short.
     private static readonly double s_etol2 =
-        0.1 * Tol2 / Math.Sqrt(Math.Max(0.001, Flattening) * Math.Min(1.0, 1 - (Flattening / 2)) / 2);
+        0.1 * Tol2 / double.Sqrt(double.Max(0.001, Flattening) * double.Min(1.0, 1 - (Flattening / 2)) / 2);
 
     private static readonly double[] s_a3x = ComputeA3Coefficients();
     private static readonly double[] s_c3x = ComputeC3Coefficients();
@@ -87,7 +87,7 @@ public static class Geodesic
 
         lat1 = RoundAngle(lat1);
         lat2 = RoundAngle(lat2);
-        int swapp = Math.Abs(lat1) < Math.Abs(lat2) ? -1 : 1;
+        int swapp = double.Abs(lat1) < double.Abs(lat2) ? -1 : 1;
         if (swapp < 0)
         {
             lonsign *= -1;
@@ -106,16 +106,16 @@ public static class Geodesic
         {
             if (cbet2 == cbet1)
             {
-                sbet2 = Math.CopySign(sbet1, sbet2);
+                sbet2 = double.CopySign(sbet1, sbet2);
             }
         }
-        else if (Math.Abs(sbet2) == -sbet1)
+        else if (double.Abs(sbet2) == -sbet1)
         {
             cbet2 = cbet1;
         }
 
-        double dn1 = Math.Sqrt(1 + (Ep2 * sbet1 * sbet1));
-        double dn2 = Math.Sqrt(1 + (Ep2 * sbet2 * sbet2));
+        double dn1 = double.Sqrt(1 + (Ep2 * sbet1 * sbet1));
+        double dn2 = double.Sqrt(1 + (Ep2 * sbet2 * sbet2));
 
         Span<double> ca = stackalloc double[SeriesOrder + 1];
         double s12x = 0;
@@ -138,8 +138,8 @@ public static class Geodesic
             double ssig2 = sbet2;
             double csig2 = calp2 * cbet2;
 
-            double sig12 = Math.Atan2(
-                Math.Max(0.0, (csig1 * ssig2) - (ssig1 * csig2)) + 0, (csig1 * csig2) + (ssig1 * ssig2));
+            double sig12 = double.Atan2(
+                double.Max(0.0, (csig1 * ssig2) - (ssig1 * csig2)) + 0, (csig1 * csig2) + (ssig1 * ssig2));
             Lengths(ThirdFlattening, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2, true, out s12x, out double m12x, ca);
 
             if (sig12 < Tol2 || m12x >= 0)
@@ -203,7 +203,7 @@ public static class Geodesic
         SinCosDegrees(latitude, out sbet, out cbet);
         sbet *= F1;
         Normalize(ref sbet, ref cbet);
-        cbet = Math.Max(Tiny, cbet);
+        cbet = double.Max(Tiny, cbet);
     }
 
     /// <summary>
@@ -234,10 +234,10 @@ public static class Geodesic
         {
             double sbetm2 = (sbet1 + sbet2) * (sbet1 + sbet2);
             sbetm2 /= sbetm2 + ((cbet1 + cbet2) * (cbet1 + cbet2));
-            dnm = Math.Sqrt(1 + (Ep2 * sbetm2));
+            dnm = double.Sqrt(1 + (Ep2 * sbetm2));
             double omg12 = lam12 / (F1 * dnm);
-            somg12 = Math.Sin(omg12);
-            comg12 = Math.Cos(omg12);
+            somg12 = double.Sin(omg12);
+            comg12 = double.Cos(omg12);
         }
         else
         {
@@ -258,16 +258,16 @@ public static class Geodesic
             salp2 = cbet1 * somg12;
             calp2 = sbet12 - (cbet1 * sbet2 * (comg12 >= 0 ? somg12 * somg12 / (1 + comg12) : 1 - comg12));
             Normalize(ref salp2, ref calp2);
-            sig12 = Math.Atan2(ssig12, csig12);
+            sig12 = double.Atan2(ssig12, csig12);
         }
-        else if (csig12 < 0 && ssig12 < 6 * ThirdFlattening * Math.PI * cbet1 * cbet1)
+        else if (csig12 < 0 && ssig12 < 6 * ThirdFlattening * double.Pi * cbet1 * cbet1)
         {
             // The points are nearly antipodal, where the spherical approximation is poor. Scale lam12 and bet2 to
             // coordinates in which the antipodal point is at the origin and the singular point at (-1, 0).
-            double lam12x = Math.Atan2(-slam12, -clam12);
+            double lam12x = double.Atan2(-slam12, -clam12);
             double k2 = sbet1 * sbet1 * Ep2;
-            double eps = k2 / ((2 * (1 + Math.Sqrt(1 + k2))) + k2);
-            double lamscale = Flattening * cbet1 * A3(eps) * Math.PI;
+            double eps = k2 / ((2 * (1 + double.Sqrt(1 + k2))) + k2);
+            double lamscale = Flattening * cbet1 * A3(eps) * double.Pi;
             double betscale = lamscale * cbet1;
             double x = lam12x / lamscale;
             double y = sbet12a / betscale;
@@ -275,16 +275,16 @@ public static class Geodesic
             if (y > -Tol1 && x > -1 - Xthresh)
             {
                 // Strip near the cut.
-                salp1 = Math.Min(1.0, -x);
-                calp1 = -Math.Sqrt(1 - (salp1 * salp1));
+                salp1 = double.Min(1.0, -x);
+                calp1 = -double.Sqrt(1 - (salp1 * salp1));
             }
             else
             {
                 // Estimate omg12 from the astroid problem, then alp1 from the spherical formula.
                 double k = Astroid(x, y);
                 double omg12a = lamscale * (-x * k / (1 + k));
-                somg12 = Math.Sin(omg12a);
-                comg12 = -Math.Cos(omg12a);
+                somg12 = double.Sin(omg12a);
+                comg12 = -double.Cos(omg12a);
                 salp1 = cbet2 * somg12;
                 calp1 = sbet12a - (cbet2 * sbet1 * somg12 * somg12 / (1 - comg12));
             }
@@ -328,22 +328,22 @@ public static class Geodesic
         {
             // Pick the sign on the square root to maximize abs(T3), which minimizes loss of precision.
             double t3 = s + r3;
-            t3 += t3 < 0 ? -Math.Sqrt(disc) : Math.Sqrt(disc);
-            double t = Math.Cbrt(t3);
+            t3 += t3 < 0 ? -double.Sqrt(disc) : double.Sqrt(disc);
+            double t = double.Cbrt(t3);
             u += t + (t != 0 ? r2 / t : 0);
         }
         else
         {
             // T is complex, but u is real. Pick the cube root that avoids cancellation.
-            double ang = Math.Atan2(Math.Sqrt(-disc), -(s + r3));
-            u += 2 * r * Math.Cos(ang / 3);
+            double ang = double.Atan2(double.Sqrt(-disc), -(s + r3));
+            u += 2 * r * double.Cos(ang / 3);
         }
 
-        double v = Math.Sqrt((u * u) + q);
+        double v = double.Sqrt((u * u) + q);
         double uv = u < 0 ? q / (v - u) : u + v;
         double w = (uv - q) / (2 * v);
 
-        return uv / (Math.Sqrt(uv + (w * w)) + w);
+        return uv / (double.Sqrt(uv + (w * w)) + w);
     }
 
     /// <summary>
@@ -376,7 +376,7 @@ public static class Geodesic
                 out ssig1, out csig1, out ssig2, out csig2, out eps, numit < NewtonIterationLimit, out double dv, ca);
 
             // The reversed test lets NaNs escape.
-            if (tripb || !(Math.Abs(v) >= (tripn ? 8 : 1) * Tol0) || numit == BisectionIterationLimit)
+            if (tripb || !(double.Abs(v) >= (tripn ? 8 : 1) * Tol0) || numit == BisectionIterationLimit)
             {
                 break;
             }
@@ -395,10 +395,10 @@ public static class Geodesic
             if (numit < NewtonIterationLimit && dv > 0)
             {
                 double dalp1 = -v / dv;
-                if (Math.Abs(dalp1) < Math.PI)
+                if (double.Abs(dalp1) < double.Pi)
                 {
-                    double sdalp1 = Math.Sin(dalp1);
-                    double cdalp1 = Math.Cos(dalp1);
+                    double sdalp1 = double.Sin(dalp1);
+                    double cdalp1 = double.Cos(dalp1);
                     double nsalp1 = (salp1 * cdalp1) + (calp1 * sdalp1);
                     if (nsalp1 > 0)
                     {
@@ -407,7 +407,7 @@ public static class Geodesic
                         Normalize(ref salp1, ref calp1);
 
                         // Convergence is not always quadratic, so test against epsilon rather than its square root.
-                        tripn = Math.Abs(v) <= 16 * Tol0;
+                        tripn = double.Abs(v) <= 16 * Tol0;
                         continue;
                     }
                 }
@@ -418,8 +418,8 @@ public static class Geodesic
             calp1 = (calp1a + calp1b) / 2;
             Normalize(ref salp1, ref calp1);
             tripn = false;
-            tripb = Math.Abs(salp1a - salp1) + (calp1a - calp1) < Tolb
-                || Math.Abs(salp1 - salp1b) + (calp1 - calp1b) < Tolb;
+            tripb = double.Abs(salp1a - salp1) + (calp1a - calp1) < Tolb
+                || double.Abs(salp1 - salp1b) + (calp1 - calp1b) < Tolb;
         }
 
         Lengths(eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2, true, out double s12b, out _, ca);
@@ -455,11 +455,11 @@ public static class Geodesic
 
         // Enforce symmetries where abs(bet2) = -bet1, which can otherwise make the iteration singular.
         salp2 = cbet2 != cbet1 ? salp0 / cbet2 : salp1;
-        calp2 = cbet2 != cbet1 || Math.Abs(sbet2) != -sbet1
-            ? Math.Sqrt((calp1 * cbet1 * calp1 * cbet1) + (cbet1 < -sbet1
+        calp2 = cbet2 != cbet1 || double.Abs(sbet2) != -sbet1
+            ? double.Sqrt((calp1 * cbet1 * calp1 * cbet1) + (cbet1 < -sbet1
                 ? (cbet2 - cbet1) * (cbet1 + cbet2)
                 : (sbet1 - sbet2) * (sbet1 + sbet2))) / cbet2
-            : Math.Abs(calp1);
+            : double.Abs(calp1);
 
         ssig2 = sbet2;
         double somg2 = salp0 * sbet2;
@@ -468,15 +468,15 @@ public static class Geodesic
         Normalize(ref ssig2, ref csig2);
 
         // sig12 = sig2 - sig1 and omg12 = omg2 - omg1, both limited to [0, pi].
-        sig12 = Math.Atan2(Math.Max(0.0, (csig1 * ssig2) - (ssig1 * csig2)) + 0, (csig1 * csig2) + (ssig1 * ssig2));
-        double somg12 = Math.Max(0.0, (comg1 * somg2) - (somg1 * comg2)) + 0;
+        sig12 = double.Atan2(double.Max(0.0, (csig1 * ssig2) - (ssig1 * csig2)) + 0, (csig1 * csig2) + (ssig1 * ssig2));
+        double somg12 = double.Max(0.0, (comg1 * somg2) - (somg1 * comg2)) + 0;
         double comg12 = (comg1 * comg2) + (somg1 * somg2);
 
         // eta = omg12 - lam120.
-        double eta = Math.Atan2((somg12 * clam120) - (comg12 * slam120), (comg12 * clam120) + (somg12 * slam120));
+        double eta = double.Atan2((somg12 * clam120) - (comg12 * slam120), (comg12 * clam120) + (somg12 * slam120));
 
         double k2 = calp0 * calp0 * Ep2;
-        eps = k2 / ((2 * (1 + Math.Sqrt(1 + k2))) + k2);
+        eps = k2 / ((2 * (1 + double.Sqrt(1 + k2))) + k2);
         C3Coefficients(eps, ca);
         double b312 = SinCosSeries(true, ssig2, csig2, ca, SeriesOrder - 1)
             - SinCosSeries(true, ssig1, csig1, ca, SeriesOrder - 1);
@@ -557,9 +557,9 @@ public static class Geodesic
     /// <summary>Reduces an angle in degrees to the range [-180, 180].</summary>
     internal static double NormalizeAngle(double x)
     {
-        double y = Math.IEEERemainder(x, FullTurn);
+        double y = double.Ieee754Remainder(x, FullTurn);
 
-        return Math.Abs(y) == HalfTurn ? Math.CopySign(HalfTurn, x) : y;
+        return double.Abs(y) == HalfTurn ? double.CopySign(HalfTurn, x) : y;
     }
 
     /// <summary>
@@ -567,15 +567,16 @@ public static class Geodesic
     /// </summary>
     private static double AngleDifference(double x, double y, out double e)
     {
-        double d = SumWithError(Math.IEEERemainder(-x, FullTurn), Math.IEEERemainder(y, FullTurn), out double t);
+        double d = SumWithError(
+            double.Ieee754Remainder(-x, FullTurn), double.Ieee754Remainder(y, FullTurn), out double t);
 
         // The second sum can only change d if abs(d) < 128, so the remainder is not needed again.
-        d = SumWithError(Math.IEEERemainder(d, FullTurn), t, out t);
+        d = SumWithError(double.Ieee754Remainder(d, FullTurn), t, out t);
 
         // Fix the sign if d is -180, 0 or 180.
-        if (d == 0 || Math.Abs(d) == HalfTurn)
+        if (d == 0 || double.Abs(d) == HalfTurn)
         {
-            d = Math.CopySign(d, t == 0 ? y - x : -t);
+            d = double.CopySign(d, t == 0 ? y - x : -t);
         }
 
         e = t;
@@ -600,11 +601,11 @@ public static class Geodesic
     internal static double RoundAngle(double x)
     {
         const double Z = 1.0 / 16.0;
-        double y = Math.Abs(x);
+        double y = double.Abs(x);
         double w = Z - y;
         y = w > 0 ? Z - w : y;
 
-        return Math.CopySign(y, x);
+        return double.CopySign(y, x);
     }
 
     /// <summary>
@@ -626,18 +627,18 @@ public static class Geodesic
 
     private static double RemainderQuarterTurns(double x, out int quadrant)
     {
-        double r = Math.IEEERemainder(x, QuarterTurn);
+        double r = double.Ieee754Remainder(x, QuarterTurn);
 
         // Only the low two bits are needed, so reduce the quotient first to keep it within an int.
-        quadrant = (int)(Math.Round((x - r) / QuarterTurn) % 4);
+        quadrant = (int)(double.Round((x - r) / QuarterTurn) % 4);
 
         return r;
     }
 
     private static void SinCosInQuadrant(double radians, int quadrant, double x, out double sinx, out double cosx)
     {
-        double s = Math.Sin(radians);
-        double c = Math.Cos(radians);
+        double s = double.Sin(radians);
+        double c = double.Cos(radians);
         (sinx, cosx) = (quadrant & 3) switch
         {
             0 => (s, c),
@@ -650,7 +651,7 @@ public static class Geodesic
         cosx += 0;
         if (sinx == 0)
         {
-            sinx = Math.CopySign(sinx, x);
+            sinx = double.CopySign(sinx, x);
         }
     }
 
@@ -661,7 +662,7 @@ public static class Geodesic
     internal static double Atan2Degrees(double y, double x)
     {
         int q = 0;
-        if (Math.Abs(y) > Math.Abs(x))
+        if (double.Abs(y) > double.Abs(x))
         {
             (x, y) = (y, x);
             q = 2;
@@ -673,11 +674,11 @@ public static class Geodesic
             q++;
         }
 
-        double ang = Math.Atan2(y, x) / Degree;
+        double ang = double.Atan2(y, x) / Degree;
 
         return q switch
         {
-            1 => Math.CopySign(HalfTurn, y) - ang,
+            1 => double.CopySign(HalfTurn, y) - ang,
             2 => QuarterTurn - ang,
             3 => -QuarterTurn + ang,
             _ => ang,
@@ -843,7 +844,7 @@ public static class Geodesic
         int k = 0;
         for (int j = SeriesOrder - 1; j >= 0; j--)
         {
-            int m = Math.Min(SeriesOrder - j - 1, j);
+            int m = int.Min(SeriesOrder - j - 1, j);
             a3x[k++] = PolynomialValue(m, coefficients[o..], ThirdFlattening) / coefficients[o + m + 1];
             o += m + 2;
         }
@@ -879,7 +880,7 @@ public static class Geodesic
         {
             for (int j = SeriesOrder - 1; j >= l; j--)
             {
-                int m = Math.Min(SeriesOrder - j - 1, j);
+                int m = int.Min(SeriesOrder - j - 1, j);
                 c3x[k++] = PolynomialValue(m, coefficients[o..], ThirdFlattening) / coefficients[o + m + 1];
                 o += m + 2;
             }
