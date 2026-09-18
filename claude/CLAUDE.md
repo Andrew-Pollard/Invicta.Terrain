@@ -70,6 +70,9 @@ project; the C# and Markdown files are imported at the end. Keep the three files
 - **Line endings:** repositories check out with CRLF (`core.autocrlf=true`; `.gitattributes` normalizes the index
   to LF). The Write tool creates LF files, so convert new files to CRLF without a BOM and check for LF or mixed
   endings before finishing. If `git status` then lists files whose diff is empty, run `git add -u`.
+- **Bulk edits:** a tool that rewrites files in place, such as `sed -i` across a folder, can leave LF endings behind
+  on files whose content it did not change. Git compares them normalized, so `git diff` shows nothing and the files
+  stay wrong. Check the endings of every file the tool touched, not only those Git reports as changed.
 - **Commit messages:** Windows PowerShell 5.1 adds a BOM to text piped into `git commit -F -`. Write the message to
   a BOM-free file and run `git commit -F <file>`.
 

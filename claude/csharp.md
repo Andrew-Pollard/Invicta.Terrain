@@ -29,6 +29,9 @@
 - Use private fields rather than private properties.
 - Prefer `is null`, `nameof`, pattern matching, switch expressions and throw helpers such as
   `ArgumentNullException.ThrowIfNull`. Trust nullable annotations rather than adding redundant null checks.
+- Call numeric operations on the type rather than the `Math` class: `double.Sqrt`, `double.Pi`,
+  `double.Ieee754Remainder`, `int.Max`, `long.DivRem`. Pick the type the arguments already have, so that a call which
+  took the `int` or `float` overload does not quietly widen to `double`.
 - Methods have block bodies, never `=>` expression bodies; properties may use `=>`.
 - When implementing a framework abstraction, match the behaviour of its built-in implementation, and don't handle
   edge cases that it doesn't without a stated reason.
